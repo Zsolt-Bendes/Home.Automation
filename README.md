@@ -1,21 +1,23 @@
 # Garage door watcher
-Project is about how I log when someone opens or closes my garage door.
+Project is about how I monitor my garage door when the door opens or closes.
 ## The Problem
-- My garage door remotes started to mailfunction and the door open and close the door randomly.
+- My garage door remote started to malfunction and the door opened and closed randomly.
 - Additionally sometimes the kids leave the garage door open.
 - Me and my wife would like to receive a e-mail when the door gets openned or closed.
 ## Given conditions
-- WiFi connection available in the garage
-- The WiFi connection is not 100% realible
-- Power source is available in the garage
-- Message broker exists on the local net
-    - RabbitMq with MQTT pluging installed
+- A WiFi connection is available in the garage.
+- The WiFi connection may experience intermittent instability and cannot be considered fully reliable.
+### Power Availability
+- A stable power source is present in the garage and can be used to supply the required hardware components.
+### Messaging Infrastructure
+- A message broker is available on the local network.
+- The broker is RabbitMQ with the MQTT plugin installed, enabling MQTT-based communication between devices and backend services.
 # Door status watcher
 ## Hardware and Tech stack
--  Hardware: ES32-DEVKIT-32UE-4M and Reed sendsor MC-38W
--  Message type: MQTT (message broker is RabbitMq)
--  Programing languages: C/C++
-I'm using a ESP32 with a antenna and a magnetic reed relay as a sensor. When the door status changes then the ESP32 sends a MQTT message that the door status changed. I'm using [arduino-mqtt](https://github.com/256dpi/arduino-mqtt) made by Joël Gähwiler. The body of the message is in JSON format.
+- **Hardware**: ESP32-DEVKIT-32UE-4M and MC-38W reed sensor  
+- **Message type**: MQTT (message broker: RabbitMQ)  
+- **Programming languages**: C/C++  
+I'm using an ESP32 with an external antenna and a magnetic reed sensor as the input device. When the door status changes, the ESP32 sends an MQTT message indicating the new state. I'm using the [arduino-mqtt](https://github.com/256dpi/arduino-mqtt) library created by Joël Gähwiler. The message body is formatted in JSON.
 ``` C
  void sendToMQTT(bool doorStatus) {
   StaticJsonDocument<200> message;
@@ -33,9 +35,9 @@ I'm using a ESP32 with a antenna and a magnetic reed relay as a sensor. When the
   mqtt.publish(PUBLISH_DOOR_STATE, messageBuffer);
 }
 ```
-The message contains a static GUID (just in case I add more IoT devices the system) and the state it self. When status is `LOW` the door is has been openned.
-## Dealing with unrealible WiFi and volatial door state
-The WiFi signal in the garage is ok but some times the signal is weak or none existing. (Example when it is raining or snowing the signal is far weaker.) To deal with this I added reconnect functionality.
+The message contains a static GUID (in case I add more IoT devices the system) and the state it self. When status is `LOW` the door is has been openned.
+## Dealing with Unreliable  WiFi and Volatile door state
+The WiFi signal in the garage is is generally acceptable but, but at times it becomes weak. For example during rain or snow, the signal strength can drop significantly. To deal with this I added reconnect functionality.
 ``` C
 void ConnectToWifi() {
   Serial.print("Connecting to Wifi");
@@ -68,7 +70,7 @@ void WiFiEvent(WiFiEvent_t event) {
   }
 }
 ```
-The `ConnectToWifi` add event handler (`WiFiEvent`) when the WiFi status changes. When disconnected then reconnection is attemted. Additionally in this case the connection to the message broker needs to be restored as well. I solved this by adding the reconnect to `loop` function of the ESP.
+The `ConnectToWifi` function adds an event handler (`WiFiEvent`) that triggers when the WiFi status changes. When a disconnection occurs, a reconnection is attemt is made. The connection to the message broker needs to be must also be re‑established. I solved this by adding the reconnection logic to the ESP32’s `loop` function.
 ``` C
 void loop() {
   mqtt.loop();
@@ -80,8 +82,9 @@ void loop() {
 //...
 }
 ```
-Now for handling the transient state when the door opens or closes.  
-The reed relay uses a magnet to detect if the door is closing or opening. The closing and opening process is not so smoth so "phantom" events can happen. To prevent this I build in a debounce timer when the signal state changes there is a 2 seconds wait time until the next event can be processed.
+## Handling Transient Door States
+The reed relay uses a magnet to detect whether the door is opening or closing. Because the door does not move perfectly smoothly, the sensor can briefly fluctuate during movement, producing short‑lived or “phantom” state changes. These false triggers can cause multiple unwanted MQTT messages to be sent.  
+To address this, I implemented a debounce mechanism. When the signal changes state, the system starts a 2‑second debounce timer. During this period, additional state changes are ignored. Only after the debounce interval has passed will the next event be processed. This ensures that only intentional, stable door state transitions generate MQTT messages.
 ``` C
 unsigned long lastDebounceTime = 0;
 const unsigned long debounceDelay = 2000;
@@ -105,22 +108,23 @@ if ((millis() - lastDebounceTime) > debounceDelay) {
  }
 }
 ```
-# Messag consumer
-For consuming the messages from RabbitMq I build a ASP.NET core application that is hosted on my raspberry pi with docker.
-## Tech stack
--   ASP.NET core 10
--   Message broker library: [Wolverine](https://wolverine.netlify.app/)
--   Database: Postgres
--   ORM: [Marten](https://martendb.io/)
--   Domain is in DDD style with Even Sourcing
--   Mail sender provider: [Mailgun](https://login.mailgun.com/)
--   Hosting: docker
+# Message Consumer
+To consume messages from RabbitMQ, I built an ASP.NET Core application that runs on my Raspberry Pi using Docker. Its primary responsibility is to process door‑status events published by the ESP32 device and apply them to the domain model using event sourcing.
+## Tech Stack
+- **Framework:** ASP.NET Core 10  
+- **Message broker library:** [Wolverine](https://wolverine.netlify.app/)  
+- **Database:** PostgreSQL  
+- **ORM / Event Store:** [Marten](https://martendb.io/)  
+- **Domain model:** DDD with Event Sourcing  
+- **Email provider:** [Mailgun](https://login.mailgun.com/)  
+- **Hosting:** Docker  
 ## Events
-### Register garage
-There are two reasons for the existence of this message  
-- I'm using event sourcing. This means I need to create a aggregate first before I can forward any events.
-    - I could have choosen a http endpoint for this or something similiar but wanted to try out something new and learn from this.
-- I did not wanted to put much time and effort into this part as this is just a consequence of my decision of choosing event sourcing
+### Register Garage
+This event exists for two main reasons:
+- **Event Sourcing Requirement:**  
+  Since the system uses event sourcing, an aggregate must be created before any domain events can be applied. The `RegisterGarage` event initializes the aggregate so that subsequent door‑status events can be processed correctly.
+- **Design Choice and Learning Opportunity:**  
+  I could have implemented this as an HTTP endpoint or a similar mechanism, but I wanted to experiment with a message‑driven approach and learn from it. Because this event is simply a consequence of choosing event sourcing, I intentionally kept this part lightweight and straightforward.
 ``` csharp
 public sealed record RegisterGarage(Guid GarageId, GarageDoorStatus DoorStatus);
 
@@ -154,8 +158,8 @@ public static class RegisterGarageHandler
     }
 }
 ```
-### Garage door status changes
-The message essentially tells the backend that the door status has been changed. This invokes the flow of updating the aggregate.
+### Garage Door Status Changes
+When a door‑status message is received, it informs the backend that the state of the garage door has changed. This event triggers the domain workflow responsible for updating the corresponding aggregate. The system then applies the new state, persists it through event sourcing, and makes it available for any downstream processes such as notifications, projections, or audit logs.
 ``` csharp
 public sealed record UpdateGarageDoorStatus(Guid GarageId, GarageDoorStatus DoorStatus);
 
@@ -175,7 +179,8 @@ public static class UpdateGarageDoorStatusHandler
     }
 }
 ```
- When the update succeeds then the e-mail sending is triggered as a side effect(s).
+### Email Notification Side Effects
+When the aggregate update succeeds, the system triggers an email notification as a side effect. This behavior is implemented within the event‑handling pipeline: once the new door state is applied and persisted, a follow‑up command is dispatched to the email‑sending component. This ensures that notifications are only sent after the domain state is successfully updated, maintaining consistency between the stored event stream and any external communication.
 ``` csharp
 public static class GarageDoorOpenedHandler
 {
@@ -200,10 +205,10 @@ public static class GarageDoorClosedHandler
 }
 ```
 # Possible improvements
-- Adding mDNS to the ESP32
-- Add additional devices like camera feed, the ability to open/close the door from local networt
+- Add mDNS support to the ESP32.
+- Add additional devices, such as a camera feed or remote door‑control functionality on the local network.
 # Things that I learned
-- MQTT queue naming is with `/`
-- RabbitMq will map the MQTT queue to `.`. Example `garagedoor/door` will be mapped to `garagedoor.door`
-- Interoperability in Wolverine: when not using the envelope of Wolverine only 1 message type can be parsed
-- By default ESP32 doest not resolve DNS names
+- MQTT topics use `/` as the separator.
+- RabbitMQ maps MQTT topics to `.` (e.g., `garagedoor/door` → `garagedoor.door`).
+- Wolverine interoperability: without using Wolverine’s envelope, only one message type can be parsed.
+- The ESP32 does not resolve DNS names by default.
