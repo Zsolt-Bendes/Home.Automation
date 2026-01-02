@@ -37,7 +37,7 @@ I'm using an ESP32 with an external antenna and a magnetic reed sensor as the in
 ```
 The message contains a static GUID (in case I add more IoT devices the system) and the state it self. When status is `LOW` the door is has been openned.
 ## Dealing with Unreliable  WiFi and Volatile door state
-The WiFi signal in the garage is is generally acceptable but, but at times it becomes weak. For example during rain or snow, the signal strength can drop significantly. To deal with this I added reconnect functionality.
+The WiFi signal in the garage is is generally acceptable but, at times it becomes weak. For example, during rain or snow, the signal strength can drop significantly. To deal with this I added reconnect functionality.
 ``` C
 void ConnectToWifi() {
   Serial.print("Connecting to Wifi");
@@ -70,7 +70,7 @@ void WiFiEvent(WiFiEvent_t event) {
   }
 }
 ```
-The `ConnectToWifi` function adds an event handler (`WiFiEvent`) that triggers when the WiFi status changes. When a disconnection occurs, a reconnection is attemt is made. The connection to the message broker needs to be must also be re‑established. I solved this by adding the reconnection logic to the ESP32’s `loop` function.
+The `ConnectToWifi` function adds an event handler (`WiFiEvent`) that triggers when the WiFi status changes. When a disconnection occurs, a reconnection is attemt is made. The connection to the message broker also needs to be re‑established. I solved this by adding the reconnection logic to the ESP32’s `loop` function.
 ``` C
 void loop() {
   mqtt.loop();
@@ -83,7 +83,7 @@ void loop() {
 }
 ```
 ## Handling Transient Door States
-The reed relay uses a magnet to detect whether the door is opening or closing. Because the door does not move perfectly smoothly, the sensor can briefly fluctuate during movement, producing short‑lived or “phantom” state changes. These false triggers can cause multiple unwanted MQTT messages to be sent.  
+The reed relay uses a magnet to detect whether the door is opening or closing. Because the door does not move perfectly smoothly, therefore the sensor can briefly fluctuate during movement, producing short‑lived or “phantom” state changes. These false triggers can cause multiple unwanted MQTT messages to be sent.  
 To address this, I implemented a debounce mechanism. When the signal changes state, the system starts a 2‑second debounce timer. During this period, additional state changes are ignored. Only after the debounce interval has passed will the next event be processed. This ensures that only intentional, stable door state transitions generate MQTT messages.
 ``` C
 unsigned long lastDebounceTime = 0;
