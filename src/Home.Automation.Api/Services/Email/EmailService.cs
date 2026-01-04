@@ -29,12 +29,22 @@ public sealed class EmailService : IEmailService
         _emailRecipients = recipients.ConvertAll(x => new EmailRecipient(x.DisplayName, x.Email));
     }
 
+    public async Task SendGarageDoorOpenReminderMailAsync(CancellationToken cancellationToken = default)
+    {
+        _logger.SendingReminderEmail();
+        await _emailClient.SendMailAsync(
+                _emailRecipients,
+                GarageDoorSubject,
+                $"OPEN\nYour garage door is still open. Don't forget to close the door!",
+                cancellationToken);
+    }
+
     public async Task SendGarageDoorStateChangeMailAsync(
         GarageDoorStatus doorStatus,
         DateTimeOffset happenedAt,
         CancellationToken cancellationToken = default)
     {
-        _logger.SendingEmail(doorStatus);
+        _logger.SendingGarageDoorStatusChangeEmail(doorStatus);
         if (doorStatus is GarageDoorStatus.Open)
         {
             await _emailClient.SendMailAsync(
@@ -60,12 +70,18 @@ public static partial class Log
     [LoggerMessage(
     EventId = 0,
     Level = LogLevel.Information,
-    Message = "Sending garage door email. Door status: `{doorStatus}`")]
-    public static partial void SendingEmail(this ILogger logger, GarageDoorStatus doorStatus);
+    Message = "Sending garage door e-mail. Door status: `{doorStatus}`")]
+    public static partial void SendingGarageDoorStatusChangeEmail(this ILogger logger, GarageDoorStatus doorStatus);
 
     [LoggerMessage(
     EventId = 1,
     Level = LogLevel.Information,
     Message = "E-mail send successfully")]
     public static partial void EmailSend(this ILogger logger);
+
+    [LoggerMessage(
+    EventId = 3,
+    Level = LogLevel.Information,
+    Message = "Sending garage door reminder e-mail.")]
+    public static partial void SendingReminderEmail(this ILogger logger);
 }

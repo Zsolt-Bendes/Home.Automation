@@ -8,4 +8,6 @@ public interface IEmailService
         GarageDoorStatus doorStatus,
         DateTimeOffset happenedAt,
         CancellationToken cancellationToken = default);
+
+    Task SendGarageDoorOpenReminderMailAsync(CancellationToken cancellationToken = default);
 }

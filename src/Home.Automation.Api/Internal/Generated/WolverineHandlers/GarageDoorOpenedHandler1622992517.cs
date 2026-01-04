@@ -32,7 +32,7 @@ namespace Internal.Generated.WolverineHandlers
             System.Diagnostics.Activity.Current?.SetTag("message.handler", "Home.Automation.Api.Features.Garage.GarageDoorOpenedHandler");
             
             // The actual message execution
-            await Home.Automation.Api.Features.Garage.GarageDoorOpenedHandler.Handle(garageDoorOpened, emailService, cancellation).ConfigureAwait(false);
+            await Home.Automation.Api.Features.Garage.GarageDoorOpenedHandler.Handle(garageDoorOpened, emailService, context, cancellation).ConfigureAwait(false);
 
         }
 

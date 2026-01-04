@@ -1,4 +1,5 @@
 using Home.Automation.Api.Domain.Garages.Events;
+using Home.Automation.Api.Domain.Garages.IntegrationMessages;
 using Home.Automation.Api.Features.Garage;
 using Home.Automation.Api.Infrastructure;
 using JasperFx;
@@ -8,13 +9,17 @@ using Wolverine;
 using Wolverine.ErrorHandling;
 using Wolverine.RabbitMQ;
 
+const string localQueueName = "local";
+const string integrationEventQueueName = "home_integration_events";
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseWolverine(opts =>
 {
     var rabbitMqConnectionString = builder.Configuration.GetConnectionString("rabbitMq");
     opts.UseRabbitMq(new Uri(rabbitMqConnectionString!))
-            .DisableSystemRequestReplyQueueDeclaration();
+            .DisableSystemRequestReplyQueueDeclaration()
+            .DeclareQueue(integrationEventQueueName);
 
     opts.ListenToRabbitQueue("garagedoor", q =>
     {
@@ -28,21 +33,26 @@ builder.Host.UseWolverine(opts =>
         q.PurgeOnStartup = false;
         q.TimeToLive(5.Minutes());
     })
-  .DefaultIncomingMessage<RegisterGarage>();
+    .DefaultIncomingMessage<RegisterGarage>();
 
     opts.PublishMessage<GarageDoorOpened>()
-       .ToLocalQueue("local");
+       .ToLocalQueue(localQueueName);
 
     opts.PublishMessage<GarageDoorClosed>()
-       .ToLocalQueue("local");
+       .ToLocalQueue(localQueueName);
+
+    opts.PublishMessage<GarageDoorNotClosed>()
+        .ToRabbitQueue(integrationEventQueueName);
+
+    opts.ListenToRabbitQueue(integrationEventQueueName);
 
     opts.Policies.OnException<ConcurrencyException>().RetryTimes(3);
     opts.Policies
         .OnException<NpgsqlException>()
         .RetryWithCooldown(
-        50.Milliseconds(),
-        100.Milliseconds(),
-        250.Milliseconds());
+            50.Milliseconds(),
+            100.Milliseconds(),
+            250.Milliseconds());
 
     opts.Policies.AutoApplyTransactions();
 });
