@@ -35,7 +35,7 @@ public sealed class EmailService : IEmailService
         await _emailClient.SendMailAsync(
                 _emailRecipients,
                 GarageDoorSubject,
-                $"OPEN\nYour garage door is still open. Don't forget to close the door!",
+                "OPEN\nYour garage door is still open. Don't forget to close the door!",
                 cancellationToken);
     }
 

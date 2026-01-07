@@ -65,6 +65,6 @@ public static partial class Log
     [LoggerMessage(
     EventId = 2,
     Level = LogLevel.Information,
-    Message = "Sending garage door email. Door status: `{emailStatusCode}`")]
+    Message = "Sending garage door email. E-mail service response status: `{emailStatusCode}`")]
     public static partial void EmailSendToMailGun(this ILogger logger, HttpStatusCode emailStatusCode);
 }
