@@ -1,6 +1,12 @@
 @Home.Automation.Api_HostAddress = http://localhost:5238
 
-GET {{Home.Automation.Api_HostAddress}}/weatherforecast/
+GET {{Home.Automation.Api_HostAddress}}/dashboard/
 Accept: application/json
 
 ###
+POST {{Home.Automation.Api_HostAddress}}/rooms/register
+Content-type: application/json
+Accept: application/json
+{
+  "Name": "Parent bed room"
+}

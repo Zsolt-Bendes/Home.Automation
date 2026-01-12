@@ -1,4 +1,4 @@
-﻿using Home.Automation.Api.Domain.Garages;
+using Home.Automation.Api.Domain.Garages;
 using Home.Automation.Api.Infrastructure.Settings;
 using Home.Automation.Api.Services.Email.Client;
 

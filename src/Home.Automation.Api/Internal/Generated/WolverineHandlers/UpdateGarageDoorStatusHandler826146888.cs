@@ -10,15 +10,15 @@ namespace Internal.Generated.WolverineHandlers
     [global::System.CodeDom.Compiler.GeneratedCode("JasperFx", "1.0.0")]
     public sealed class UpdateGarageDoorStatusHandler826146888 : Wolverine.Runtime.Handlers.MessageHandler
     {
+        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Features.Garage.UpdateGarageDoorStatus> _loggerForMessage;
         private readonly System.TimeProvider _timeProvider;
-        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
 
-        public UpdateGarageDoorStatusHandler826146888(Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Features.Garage.UpdateGarageDoorStatus> loggerForMessage, System.TimeProvider timeProvider, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory)
+        public UpdateGarageDoorStatusHandler826146888(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Features.Garage.UpdateGarageDoorStatus> loggerForMessage, System.TimeProvider timeProvider)
         {
+            _outboxedSessionFactory = outboxedSessionFactory;
             _loggerForMessage = loggerForMessage;
             _timeProvider = timeProvider;
-            _outboxedSessionFactory = outboxedSessionFactory;
         }
 
 
@@ -39,9 +39,9 @@ namespace Internal.Generated.WolverineHandlers
 
             // Loading Marten aggregate as part of the aggregate handler workflow
             var stream_garage = await stream_garage_BatchItem.ConfigureAwait(false);
-            var result_of_Assert2 = Wolverine.Runtime.Handlers.EntityIsNotNullGuard<Home.Automation.Api.Domain.Garages.Garage>.Assert(stream_garage.Aggregate, ((Microsoft.Extensions.Logging.ILogger)_loggerForMessage), "stream_garage.Aggregate", context.Envelope);
+            var result_of_Assert1 = Wolverine.Runtime.Handlers.EntityIsNotNullGuard<Home.Automation.Api.Domain.Garages.Garage>.Assert(stream_garage.Aggregate, ((Microsoft.Extensions.Logging.ILogger)_loggerForMessage), "stream_garage.Aggregate", context.Envelope);
             // Evaluate whether or not the execution should stop based on the HandlerContinuation value
-            if (result_of_Assert2 == Wolverine.HandlerContinuation.Stop) return;
+            if (result_of_Assert1 == Wolverine.HandlerContinuation.Stop) return;
             
             // The actual message execution
             var outgoing1 = Home.Automation.Api.Features.Garage.UpdateGarageDoorStatusHandler.Handle(updateGarageDoorStatus, stream_garage.Aggregate, _timeProvider);

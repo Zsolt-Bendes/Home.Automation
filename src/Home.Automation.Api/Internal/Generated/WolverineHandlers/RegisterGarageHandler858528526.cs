@@ -9,13 +9,13 @@ namespace Internal.Generated.WolverineHandlers
     [global::System.CodeDom.Compiler.GeneratedCode("JasperFx", "1.0.0")]
     public sealed class RegisterGarageHandler858528526 : Wolverine.Runtime.Handlers.MessageHandler
     {
-        private readonly System.TimeProvider _timeProvider;
         private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
+        private readonly System.TimeProvider _timeProvider;
 
-        public RegisterGarageHandler858528526(System.TimeProvider timeProvider, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory)
+        public RegisterGarageHandler858528526(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, System.TimeProvider timeProvider)
         {
-            _timeProvider = timeProvider;
             _outboxedSessionFactory = outboxedSessionFactory;
+            _timeProvider = timeProvider;
         }
 
 

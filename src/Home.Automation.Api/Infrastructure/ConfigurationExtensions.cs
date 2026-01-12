@@ -6,6 +6,7 @@ using JasperFx.Events.Daemon;
 using Marten;
 using System.Net.Http.Headers;
 using System.Text;
+using Wolverine.Http;
 using Wolverine.Marten;
 
 namespace Home.Automation.Api.Infrastructure;
@@ -16,8 +17,10 @@ public static class ConfigurationExtensions
     {
         services
             .AddMarten(configuration)
+            .AddWolverineHttp()
             .AddEmailRelatedDependencies(configuration)
-            .AddTimeProvider();
+            .AddTimeProvider()
+            .AddSignalR();
     }
 
     private static IServiceCollection AddMarten(this IServiceCollection services, IConfiguration configuration)

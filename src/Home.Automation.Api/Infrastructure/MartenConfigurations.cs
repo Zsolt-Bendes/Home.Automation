@@ -21,5 +21,6 @@ public sealed class MartenConfigurations : StoreOptions
         Projections.LiveStreamAggregation<Garage>();
 
         Projections.Add<GarageViewProjection>(ProjectionLifecycle.Inline);
+        Projections.Add<DashboardViewProjection>(ProjectionLifecycle.Inline);
     }
 }

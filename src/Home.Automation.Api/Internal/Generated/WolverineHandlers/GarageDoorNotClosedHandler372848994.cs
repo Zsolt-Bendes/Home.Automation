@@ -11,14 +11,14 @@ namespace Internal.Generated.WolverineHandlers
     public sealed class GarageDoorNotClosedHandler372848994 : Wolverine.Runtime.Handlers.MessageHandler
     {
         private readonly Microsoft.Extensions.DependencyInjection.IServiceScopeFactory _serviceScopeFactory;
-        private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Garages.IntegrationMessages.GarageDoorNotClosed> _loggerForMessage;
         private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
+        private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Garages.IntegrationMessages.GarageDoorNotClosed> _loggerForMessage;
 
-        public GarageDoorNotClosedHandler372848994(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Garages.IntegrationMessages.GarageDoorNotClosed> loggerForMessage, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory)
+        public GarageDoorNotClosedHandler372848994(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Garages.IntegrationMessages.GarageDoorNotClosed> loggerForMessage)
         {
             _serviceScopeFactory = serviceScopeFactory;
-            _loggerForMessage = loggerForMessage;
             _outboxedSessionFactory = outboxedSessionFactory;
+            _loggerForMessage = loggerForMessage;
         }
 
 
@@ -39,9 +39,9 @@ namespace Internal.Generated.WolverineHandlers
 
             System.Diagnostics.Activity.Current?.SetTag("message.handler", "Home.Automation.Api.Features.Garage.GarageDoorNotClosedHandler");
             var garage = await documentSession.Events.FetchLatest<Home.Automation.Api.Domain.Garages.Garage>(((Home.Automation.Api.Domain.Garages.IntegrationMessages.GarageDoorNotClosed)context.Envelope.Message).GarageId, cancellation);
-            var result_of_Assert1 = Wolverine.Runtime.Handlers.EntityIsNotNullGuard<Home.Automation.Api.Domain.Garages.Garage>.Assert(garage, ((Microsoft.Extensions.Logging.ILogger)_loggerForMessage), "garage", context.Envelope);
+            var result_of_Assert2 = Wolverine.Runtime.Handlers.EntityIsNotNullGuard<Home.Automation.Api.Domain.Garages.Garage>.Assert(garage, ((Microsoft.Extensions.Logging.ILogger)_loggerForMessage), "garage", context.Envelope);
             // Evaluate whether or not the execution should stop based on the HandlerContinuation value
-            if (result_of_Assert1 == Wolverine.HandlerContinuation.Stop) return;
+            if (result_of_Assert2 == Wolverine.HandlerContinuation.Stop) return;
             
             // The actual message execution
             await Home.Automation.Api.Features.Garage.GarageDoorNotClosedHandler.Handle(garageDoorNotClosed, garage, emailService, context, cancellation).ConfigureAwait(false);
