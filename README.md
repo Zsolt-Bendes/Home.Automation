@@ -4,6 +4,7 @@ Project is about how I monitor my garage door when the door opens or closes.
 - My garage door remote started to malfunction and the door opened and closed randomly.
 - Additionally sometimes the kids leave the garage door open.
 - Me and my wife would like to receive a e-mail when the door gets openned or closed.
+- Send reminder e-mail every 10 minutes when the door is open.
 ## Given conditions
 - A WiFi connection is available in the garage.
 - The WiFi connection may experience intermittent instability and cannot be considered fully reliable.
@@ -190,6 +191,7 @@ public static class GarageDoorOpenedHandler
         CancellationToken cancellationToken)
     {
         await emailService.SendGarageDoorStateChangeMailAsync(GarageDoorStatus.Open, evt.HappenedAt, cancellationToken);
+        await messageBus.SendAsync(new GarageDoorNotClosed(evt.GarageId).DelayedFor(10.Minutes()));
     }
 }
 
@@ -201,6 +203,23 @@ public static class GarageDoorClosedHandler
         CancellationToken cancellationToken)
     {
         await emailService.SendGarageDoorStateChangeMailAsync(GarageDoorStatus.Closed, evt.HappenedAt, cancellationToken);
+    }
+}
+
+public static class GarageDoorNotClosedHandler
+{
+    public static async Task Handle(
+        GarageDoorNotClosed evt,
+        [ReadAggregate(nameof(GarageDoorNotClosed.GarageId))] Domain.Garages.Garage garage,
+        IEmailService emailService,
+        IMessageBus messageBus,
+        CancellationToken cancellationToken)
+    {
+        if (garage.DoorStatus is GarageDoorStatus.Open)
+        {
+            await emailService.SendGarageDoorOpenReminderMailAsync(cancellationToken);
+            await messageBus.SendAsync(evt.DelayedFor(10.Minutes()));
+        }
     }
 }
 ```
