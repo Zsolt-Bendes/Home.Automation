@@ -3,23 +3,22 @@
 #include <ArduinoJson.h>
 #include <AM2302-Sensor.h>
 
-#define DHT22_PIN  15
+#define DHT22_PIN 1
 
 const char* WIFI_SSID = "";
 const char* WIFI_PASSWORD = "";
 
-const char* ROOM_ID = "";
+const char* DeviceId = "";
 
 const int MQTT_PORT = 1883;
 const char* MQTT_BROKER_ADRRESS = "";
-const char* MQTT_CLIENT_ID = "";
+const char* MQTT_CLIENT_ID = "mobile-temp";
 const char* MQTT_USERNAME = "";
 const char* MQTT_PASSWORD = "";
 
 const char* PUBLISH_ROOM_Temp = "rooms/temp";
 
-//every 10 minutes
-const int REPORT_INTERVAL = 600000;
+const int REPORT_INTERVAL = 20000;
 
 WiFiClient network;
 MQTTClient mqtt = MQTTClient(256);
@@ -39,14 +38,13 @@ void setup() {
 void loop() {
   mqtt.loop();
 
-   if (!mqtt.connected()) {
+  if (!mqtt.connected()) {
     connectToMQTT();
   }
 
   auto status = am2302.read();
 
-  if(status == 0)
-  {
+  if (status == 0) {
     sendToMQTT(am2302.get_Temperature(), am2302.get_Humidity());
   }
 
@@ -56,7 +54,7 @@ void loop() {
 void connectToWifi() {
   Serial.print("Connecting to Wifi");
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  
+
   WiFi.onEvent(wiFiEvent);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -106,7 +104,7 @@ void connectToMQTT() {
 
 void sendToMQTT(float tempInC, float humidity) {
   StaticJsonDocument<200> message;
-  message["RoomId"] = ROOM_ID;
+  message["RoomId"] = DeviceId;
   message["Temperature"] = tempInC;
   message["Humidity"] = humidity;
 

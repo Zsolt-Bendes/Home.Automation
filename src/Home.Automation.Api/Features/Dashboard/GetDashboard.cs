@@ -1,4 +1,5 @@
-﻿using Marten;
+﻿using Home.Automation.Api.Features.Dashboard.View;
+using Marten;
 using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 

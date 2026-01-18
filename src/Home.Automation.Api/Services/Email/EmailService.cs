@@ -1,4 +1,4 @@
-using Home.Automation.Api.Domain.Garages;
+using Home.Automation.Api.Domain.Devices.ValueObjects;
 using Home.Automation.Api.Infrastructure.Settings;
 using Home.Automation.Api.Services.Email.Client;
 
@@ -40,12 +40,12 @@ public sealed class EmailService : IEmailService
     }
 
     public async Task SendGarageDoorStateChangeMailAsync(
-        GarageDoorStatus doorStatus,
+        DoorStatus doorStatus,
         DateTimeOffset happenedAt,
         CancellationToken cancellationToken = default)
     {
         _logger.SendingGarageDoorStatusChangeEmail(doorStatus);
-        if (doorStatus is GarageDoorStatus.Open)
+        if (doorStatus is DoorStatus.Open)
         {
             await _emailClient.SendMailAsync(
                 _emailRecipients,
@@ -71,7 +71,7 @@ public static partial class Log
     EventId = 0,
     Level = LogLevel.Information,
     Message = "Sending garage door e-mail. Door status: `{doorStatus}`")]
-    public static partial void SendingGarageDoorStatusChangeEmail(this ILogger logger, GarageDoorStatus doorStatus);
+    public static partial void SendingGarageDoorStatusChangeEmail(this ILogger logger, DoorStatus doorStatus);
 
     [LoggerMessage(
     EventId = 1,

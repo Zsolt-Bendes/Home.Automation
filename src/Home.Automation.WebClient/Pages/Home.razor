@@ -1,0 +1,13 @@
+﻿@page "/"
+
+@if (_deviceRepository.TemperatureDevices is not null)
+{
+	<div class="flex gap-2 flex-wrap">
+		@foreach (var item in _deviceRepository.TemperatureDevices)
+		{
+			<TemperatureSensor DeviceName=@item.Name
+							   Humidity=@item.Humidity
+							   Temperature=@item.Temperature />
+		}
+	</div>
+}

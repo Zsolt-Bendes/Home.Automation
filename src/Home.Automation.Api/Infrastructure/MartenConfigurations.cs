@@ -1,5 +1,5 @@
-﻿using Home.Automation.Api.Domain.Garages;
-using Home.Automation.Api.Infrastructure.Projections;
+﻿using Home.Automation.Api.Domain.Devices;
+using Home.Automation.Api.Features.Dashboard;
 using JasperFx.Events;
 using JasperFx.Events.Projections;
 using Marten;
@@ -18,9 +18,8 @@ public sealed class MartenConfigurations : StoreOptions
         Events.UseIdentityMapForAggregates = true;
         Events.AppendMode = EventAppendMode.Quick;
 
-        Projections.LiveStreamAggregation<Garage>();
+        Projections.LiveStreamAggregation<Device>();
 
-        Projections.Add<GarageViewProjection>(ProjectionLifecycle.Inline);
         Projections.Add<DashboardViewProjection>(ProjectionLifecycle.Inline);
     }
 }

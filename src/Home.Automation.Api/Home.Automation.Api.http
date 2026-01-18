@@ -4,9 +4,24 @@ GET {{Home.Automation.Api_HostAddress}}/dashboard/
 Accept: application/json
 
 ###
-POST {{Home.Automation.Api_HostAddress}}/rooms/register
+POST {{Home.Automation.Api_HostAddress}}/devices/register
 Content-type: application/json
 Accept: application/json
 {
-  "Name": "Parent bed room"
+  "Name": "Sample temp1 device",
+  "DeviceType": 0
 }
+
+###
+POST {{Home.Automation.Api_HostAddress}}/devices/register
+Content-type: application/json
+Accept: application/json
+{
+  "Name": "Sample door2 device",
+  "DeviceType": 1,
+   "DoorStatus": 0 
+}
+
+###
+GET {{Home.Automation.Api_HostAddress}}/devices/temperature_sensors
+Accept: application/json

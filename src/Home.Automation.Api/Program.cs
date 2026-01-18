@@ -1,7 +1,6 @@
-using Home.Automation.Api.Domain.Garages.Events;
-using Home.Automation.Api.Domain.Garages.IntegrationMessages;
-using Home.Automation.Api.Features.Garage;
-using Home.Automation.Api.Features.Room;
+using Home.Automation.Api.Domain.Devices.Events;
+using Home.Automation.Api.Domain.Devices.IntegrationMessages;
+using Home.Automation.Api.Features.Device;
 using Home.Automation.Api.Infrastructure;
 using Home.Automation.Api.Services;
 using JasperFx;
@@ -35,13 +34,6 @@ builder.Host.UseWolverine(opts =>
     })
     .DefaultIncomingMessage<UpdateGarageDoorStatus>();
 
-    opts.ListenToRabbitQueue("garageregister", q =>
-    {
-        q.PurgeOnStartup = false;
-        q.TimeToLive(5.Minutes());
-    })
-    .DefaultIncomingMessage<RegisterGarage>();
-
     opts.ListenToRabbitQueue("roomtemp", q =>
     {
         q.PurgeOnStartup = false;
@@ -49,13 +41,13 @@ builder.Host.UseWolverine(opts =>
     })
     .DefaultIncomingMessage<TemperatureMeasurement>();
 
-    opts.PublishMessage<GarageDoorOpened>()
+    opts.PublishMessage<DoorOpened>()
        .ToLocalQueue(localQueueName);
 
-    opts.PublishMessage<GarageDoorClosed>()
+    opts.PublishMessage<DoorClosed>()
        .ToLocalQueue(localQueueName);
 
-    opts.PublishMessage<GarageDoorNotClosed>()
+    opts.PublishMessage<DoorNotClosed>()
         .ToRabbitQueue(integrationEventQueueName);
 
     opts.ListenToRabbitQueue(integrationEventQueueName);
@@ -73,11 +65,25 @@ builder.Host.UseWolverine(opts =>
     opts.UseFluentValidation();
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "_myAllowSpecificOrigins",
+                      policy =>
+                      {
+                          policy.AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                      });
+});
+
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+app.UseCors("_myAllowSpecificOrigins");
 
 app.MapHub<LiveUpdater>("/dashboard/live");
 

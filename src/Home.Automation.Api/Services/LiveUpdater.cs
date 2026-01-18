@@ -14,4 +14,4 @@ public class LiveUpdater : Hub
     }
 }
 
-public sealed record LiveTempData(Guid RoomId, double Temperature, double Humidity);
+public sealed record LiveTempData(Guid DeviceId, double Temperature, double Humidity);

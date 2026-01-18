@@ -19,8 +19,7 @@ public static class ConfigurationExtensions
             .AddMarten(configuration)
             .AddWolverineHttp()
             .AddEmailRelatedDependencies(configuration)
-            .AddTimeProvider()
-            .AddSignalR();
+            .AddTimeProvider();
     }
 
     private static IServiceCollection AddMarten(this IServiceCollection services, IConfiguration configuration)
