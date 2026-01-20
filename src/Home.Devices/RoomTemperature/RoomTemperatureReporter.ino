@@ -2,23 +2,16 @@
 #include <MQTTClient.h>
 #include <ArduinoJson.h>
 #include <AM2302-Sensor.h>
+#include <esp_sleep.h>
+
+#include "config.h"
 
 #define DHT22_PIN 1
 
-const char* WIFI_SSID = "";
-const char* WIFI_PASSWORD = "";
-
-const char* DeviceId = "";
-
-const int MQTT_PORT = 1883;
-const char* MQTT_BROKER_ADRRESS = "";
-const char* MQTT_CLIENT_ID = "mobile-temp";
-const char* MQTT_USERNAME = "";
-const char* MQTT_PASSWORD = "";
-
 const char* PUBLISH_ROOM_Temp = "rooms/temp";
 
-const int REPORT_INTERVAL = 20000;
+const uint64_t uS = 1000000ULL;
+const uint64_t SLEEP_TIME = 5ULL * 60ULL * uS; // 5 minutes
 
 WiFiClient network;
 MQTTClient mqtt = MQTTClient(256);
@@ -33,10 +26,9 @@ void setup() {
   connectToMQTT();
 
   am2302.begin();
-}
-
-void loop() {
+  
   mqtt.loop();
+  delay(100);
 
   if (!mqtt.connected()) {
     connectToMQTT();
@@ -44,11 +36,24 @@ void loop() {
 
   auto status = am2302.read();
 
-  if (status == 0) {
-    sendToMQTT(am2302.get_Temperature(), am2302.get_Humidity());
-  }
+  do {
+    delay(210);
+    status = am2302.read();
+  }while(status != 0);
 
-  delay(REPORT_INTERVAL);
+  sendToMQTT(am2302.get_Temperature(), am2302.get_Humidity());
+
+// Graceful disconnect 
+  mqtt.disconnect();
+  delay(50); 
+  WiFi.disconnect(true);
+
+  esp_sleep_enable_timer_wakeup(SLEEP_TIME);
+  esp_deep_sleep_start();
+}
+
+void loop() {
+  
 }
 
 void connectToWifi() {
@@ -104,7 +109,7 @@ void connectToMQTT() {
 
 void sendToMQTT(float tempInC, float humidity) {
   StaticJsonDocument<200> message;
-  message["RoomId"] = DeviceId;
+  message["DeviceId"] = DeviceId;
   message["Temperature"] = tempInC;
   message["Humidity"] = humidity;
 
