@@ -20,7 +20,7 @@ public sealed record Device(
             return;
         }
 
-        sensor.DoorStatus = DoorStatus.Closed;
+        sensor.UpdateDoorStatusTo(DoorStatus.Closed);
     }
 
     public static void Apply(DoorOpened doorClosed, Device device)
@@ -31,6 +31,6 @@ public sealed record Device(
             return;
         }
 
-        sensor.DoorStatus = DoorStatus.Open;
+        sensor.UpdateDoorStatusTo(DoorStatus.Open);
     }
 }

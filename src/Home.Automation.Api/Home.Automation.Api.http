@@ -17,9 +17,10 @@ POST {{Home.Automation.Api_HostAddress}}/devices/register
 Content-type: application/json
 Accept: application/json
 {
-  "Name": "Sample door2 device",
+  "Name": "Garage door 01", 
   "DeviceType": 1,
-   "DoorStatus": 0 
+  "SendStatusChangeEmails": true, 
+  "OpenReminderTimeSpan": "00:10:00"
 }
 
 ###

@@ -3,7 +3,6 @@ using Home.Automation.Api.Domain.Devices.Events;
 using Home.Automation.Api.Domain.Devices.IntegrationMessages;
 using Home.Automation.Api.Domain.Devices.ValueObjects;
 using Home.Automation.Api.Services.Email;
-using JasperFx.Core;
 using Wolverine;
 using Wolverine.Marten;
 
@@ -43,7 +42,12 @@ public static class DoorOpenedHandler
         }
 
         await emailService.SendGarageDoorStateChangeMailAsync(DoorStatus.Open, evt.HappenedAt, cancellationToken);
-        await messageBus.SendAsync(new DoorNotClosed(evt.DeviceId).DelayedFor(10.Minutes()));
+        if (sensor?.OpenReminderTimeSpan is not null)
+        {
+            await messageBus.SendAsync(
+                new DoorNotClosed(evt.DeviceId)
+                .DelayedFor(sensor.OpenReminderTimeSpan.Value));
+        }
     }
 }
 
@@ -78,7 +82,12 @@ public static class DoorNotClosedHandler
         if (sensor?.DoorStatus is DoorStatus.Open)
         {
             await emailService.SendGarageDoorOpenReminderMailAsync(cancellationToken);
-            await messageBus.SendAsync(evt.DelayedFor(10.Minutes()));
+            if (sensor?.SendNotification is true && sensor?.OpenReminderTimeSpan is not null)
+            {
+                await messageBus.SendAsync(
+                    new DoorNotClosed(evt.DeviceId)
+                    .DelayedFor(sensor.OpenReminderTimeSpan.Value));
+            }
         }
     }
 }

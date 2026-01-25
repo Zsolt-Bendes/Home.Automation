@@ -16,20 +16,20 @@ namespace Internal.Generated.WolverineHandlers
     public sealed class POST_devices_register : Wolverine.Http.HttpHandler
     {
         private readonly Wolverine.Http.WolverineHttpOptions _wolverineHttpOptions;
-        private readonly Wolverine.Http.FluentValidation.IProblemDetailSource<Home.Automation.Api.Features.Device.RegisterDevice> _problemDetailSource;
-        private readonly FluentValidation.IValidator<Home.Automation.Api.Features.Device.RegisterDevice> _validator;
-        private readonly System.TimeProvider _timeProvider;
-        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly Wolverine.Runtime.IWolverineRuntime _wolverineRuntime;
+        private readonly System.TimeProvider _timeProvider;
+        private readonly FluentValidation.IValidator<Home.Automation.Api.Features.Device.RegisterDevice> _validator;
+        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
+        private readonly Wolverine.Http.FluentValidation.IProblemDetailSource<Home.Automation.Api.Features.Device.RegisterDevice> _problemDetailSource;
 
-        public POST_devices_register(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Http.FluentValidation.IProblemDetailSource<Home.Automation.Api.Features.Device.RegisterDevice> problemDetailSource, FluentValidation.IValidator<Home.Automation.Api.Features.Device.RegisterDevice> validator, System.TimeProvider timeProvider, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Wolverine.Runtime.IWolverineRuntime wolverineRuntime) : base(wolverineHttpOptions)
+        public POST_devices_register(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Runtime.IWolverineRuntime wolverineRuntime, System.TimeProvider timeProvider, FluentValidation.IValidator<Home.Automation.Api.Features.Device.RegisterDevice> validator, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Wolverine.Http.FluentValidation.IProblemDetailSource<Home.Automation.Api.Features.Device.RegisterDevice> problemDetailSource) : base(wolverineHttpOptions)
         {
             _wolverineHttpOptions = wolverineHttpOptions;
-            _problemDetailSource = problemDetailSource;
-            _validator = validator;
-            _timeProvider = timeProvider;
-            _outboxedSessionFactory = outboxedSessionFactory;
             _wolverineRuntime = wolverineRuntime;
+            _timeProvider = timeProvider;
+            _validator = validator;
+            _outboxedSessionFactory = outboxedSessionFactory;
+            _problemDetailSource = problemDetailSource;
         }
 
 

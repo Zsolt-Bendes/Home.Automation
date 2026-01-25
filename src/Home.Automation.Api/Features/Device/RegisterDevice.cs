@@ -12,8 +12,8 @@ namespace Home.Automation.Api.Features.Device;
 
 public sealed record RegisterDevice(
     string Name,
-    SensorType DeviceType,
-    DoorStatus? DoorStatus)
+    SensorType SensorType,
+    DoorSensorRequest? DoorSensor)
 {
     public sealed class RegisterRoomValidator : AbstractValidator<RegisterDevice>
     {
@@ -22,9 +22,17 @@ public sealed record RegisterDevice(
             RuleFor(_ => _.Name)
                 .NotEmpty()
                 .MaximumLength(DeviceName._maxLength);
+            RuleFor(_ => _.DoorSensor)
+                .NotNull()
+                .When(_ => _.SensorType is SensorType.Door);
         }
     }
 }
+
+public sealed record DoorSensorRequest(
+    DoorStatus DoorStatus,
+    bool SendStatusChangeEmails,
+    TimeSpan? OpenReminderTimeSpan);
 
 public sealed record RegisterDeviceResponse(Guid Id);
 
@@ -60,7 +68,7 @@ public static class RegisterDeviceEndpoint
     {
         var id = Guid.CreateVersion7();
 
-        if (command.DeviceType is SensorType.Door)
+        if (command.SensorType is SensorType.Door)
         {
             _ = documentSession.Events.StartStream(
                 id,
@@ -68,15 +76,15 @@ public static class RegisterDeviceEndpoint
                     id,
                     new DeviceName(command.Name),
                     SensorType.Door,
-                    new List<Sensor> { new Domain.Devices.Entities.DoorStatusSensor(
+                    new List<Sensor> { Domain.Devices.Entities.DoorStatusSensor.Create(
                         Guid.NewGuid(),
-                        DoorStatus.Open,
-                        SensorType.Door,
-                        true) },
+                        command.DoorSensor!.DoorStatus,
+                        command.DoorSensor.SendStatusChangeEmails,
+                        command.DoorSensor.OpenReminderTimeSpan) },
                     timeProvider.GetLocalNow()));
         }
 
-        if (command.DeviceType is SensorType.TemperatureAndHumidity)
+        if (command.SensorType is SensorType.TemperatureAndHumidity)
         {
             _ = documentSession.Events.StartStream(
                 id,
@@ -84,7 +92,7 @@ public static class RegisterDeviceEndpoint
                     id,
                     new DeviceName(command.Name),
 
-                    command.DeviceType,
+                    command.SensorType,
                     new List<Sensor> { new Domain.Devices.Entities.TemperatureAndHumiditySensor(
                         Guid.NewGuid(),
                         SensorType.TemperatureAndHumidity,

@@ -1,24 +1,16 @@
 #include <WiFi.h>
 #include <MQTTClient.h>
 #include <ArduinoJson.h>
+#include <esp_sleep.h>
 
-const char* WIFI_SSID = "";
-const char* WIFI_PASSWORD = "";
-
-const char* GARAGE_ID = "59652B18-3AFB-415D-80FE-AE92532203DD";
-const char* MQTT_BROKER_ADRRESS = "";
-const int MQTT_PORT = 1883;
-const char* MQTT_CLIENT_ID = "Garage-esp-01";
-const char* MQTT_USERNAME = "";
-const char* MQTT_PASSWORD = "";
+#include "config.h"
 
 const char* PUBLISH_DOOR_STATE = "garagedoor/door";
-const char* PUBLISH_REGISTER_DEVICE = "garageregister/register";
 
-const int DOOR_PIN = 19;
+const int DOOR_PIN = 2;
 
-bool registered;
-int lastState = HIGH;
+RTC_DATA_ATTR bool registered;
+RTC_DATA_ATTR int lastState = HIGH;
 
 unsigned long lastReconnectAttempt = 0;
 WiFiClient network;
@@ -29,26 +21,27 @@ const unsigned long debounceDelay = 2000;
 
 void setup() {
   Serial.begin(115200);
-  pinMode(DOOR_PIN, INPUT_PULLUP); 
+  delay(1000);
+
+  pinMode(DOOR_PIN, INPUT_PULLUP);
 
   WiFi.mode(WIFI_STA);
-
   ConnectToWifi();
 
-  connectToMQTT();
-}
-
-void loop() {
   mqtt.loop();
 
-   if (!mqtt.connected()) {
+  if (!mqtt.connected()) {
     connectToMQTT();
   }
 
   int reading = digitalRead(DOOR_PIN);
-  if(!registered){
+  if (!registered) {
     lastState = reading;
-    sendToMQTTRegister(reading);
+    if (lastState == LOW) {
+      sendToMQTT(true);
+    } else {
+      sendToMQTT(false);
+    }
     registered = true;
   }
 
@@ -66,7 +59,23 @@ void loop() {
         lastState = LOW;
       }
     }
- }
+  }
+
+  if (lastState == LOW) {
+    esp_sleep_enable_ext1_wakeup(1ULL << DOOR_PIN, ESP_EXT1_WAKEUP_ANY_HIGH);
+  } else {
+    esp_sleep_enable_ext1_wakeup(1ULL << DOOR_PIN, ESP_EXT1_WAKEUP_ALL_LOW);
+  }
+
+  // Graceful disconnect
+  mqtt.disconnect();
+  delay(50);
+  WiFi.mode(WIFI_OFF);
+
+  esp_deep_sleep_start();
+}
+
+void loop() {
 }
 
 void connectToMQTT() {
@@ -89,14 +98,13 @@ void connectToMQTT() {
   Serial.println("ESP32 - MQTT broker Connected!");
 }
 
- void sendToMQTT(bool doorStatus) {
+void sendToMQTT(bool doorStatus) {
   StaticJsonDocument<200> message;
-  message["GarageId"] = GARAGE_ID;
-    if(doorStatus)  {
-    message["DoorStatus"] = 0; 
-  }
-  else {
-    message["DoorStatus"] = 1; 
+  message["DeviceId"] = DeviceId;
+  if (doorStatus) {
+    message["DoorStatus"] = 0;
+  } else {
+    message["DoorStatus"] = 1;
   }
 
   char messageBuffer[512];
@@ -107,29 +115,6 @@ void connectToMQTT() {
   Serial.println("ESP32 - sent to MQTT:");
   Serial.print("- topic: ");
   Serial.println(PUBLISH_DOOR_STATE);
-  Serial.print("- payload:");
-  Serial.println(messageBuffer);
-}
-
-void sendToMQTTRegister(bool doorStatus) {
-  StaticJsonDocument<200> message;
-  message["GarageId"] = GARAGE_ID;
-  
-  if(doorStatus)  {
-    message["DoorStatus"] = 0; 
-  }
-  else {
-    message["DoorStatus"] = 1; 
-  }
-
-  char messageBuffer[512];
-  serializeJson(message, messageBuffer);
-
-  mqtt.publish(PUBLISH_REGISTER_DEVICE, messageBuffer);
-
-  Serial.println("ESP32 - sent to MQTT:");
-  Serial.print("- topic: ");
-  Serial.println(PUBLISH_REGISTER_DEVICE);
   Serial.print("- payload:");
   Serial.println(messageBuffer);
 }
@@ -151,7 +136,7 @@ void WiFiEvent(WiFiEvent_t event) {
 void ConnectToWifi() {
   Serial.print("Connecting to Wifi");
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  
+
   WiFi.onEvent(WiFiEvent);
 
   while (WiFi.status() != WL_CONNECTED) {
