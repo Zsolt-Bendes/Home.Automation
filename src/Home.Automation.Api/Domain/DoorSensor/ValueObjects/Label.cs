@@ -1,9 +1,9 @@
 using Home.Automation.Api.Domain.Common;
 using Throw;
 
-namespace Home.Automation.Api.Domain.Devices.ValueObjects;
+namespace Home.Automation.Api.Domain.DoorSensor.ValueObjects;
 
-public sealed class DeviceName(string name) : ValueObject
+public sealed class Label(string name) : ValueObject
 {
     internal const int _maxLength = 20;
 

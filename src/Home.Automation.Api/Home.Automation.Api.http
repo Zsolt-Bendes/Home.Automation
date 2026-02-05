@@ -8,8 +8,8 @@ POST {{Home.Automation.Api_HostAddress}}/devices/register
 Content-type: application/json
 Accept: application/json
 {
-  "Name": "Sample temp1 device",
-  "DeviceType": 0
+  "Label": "Sample temp1 device",
+  "SensorType": 0
 }
 
 ###
@@ -17,10 +17,14 @@ POST {{Home.Automation.Api_HostAddress}}/devices/register
 Content-type: application/json
 Accept: application/json
 {
-  "Name": "Garage door 01", 
-  "DeviceType": 1,
-  "SendStatusChangeEmails": true, 
-  "OpenReminderTimeSpan": "00:10:00"
+  "Label": "Garage door 04", 
+  "SensorType": 1,
+  "DoorSensor": 
+  {
+    "DoorStatus": 0,
+    "SendStatusChangeEmails": true, 
+    "OpenReminderTimeSpan": null
+  }
 }
 
 ###

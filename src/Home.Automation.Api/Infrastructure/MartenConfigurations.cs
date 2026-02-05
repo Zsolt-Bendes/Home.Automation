@@ -1,4 +1,5 @@
-﻿using Home.Automation.Api.Domain.Devices;
+﻿using Home.Automation.Api.Domain.DoorSensor;
+using Home.Automation.Api.Domain.TempAndHumiditySensors;
 using Home.Automation.Api.Features.Dashboard;
 using JasperFx.Events;
 using JasperFx.Events.Projections;
@@ -18,7 +19,8 @@ public sealed class MartenConfigurations : StoreOptions
         Events.UseIdentityMapForAggregates = true;
         Events.AppendMode = EventAppendMode.Quick;
 
-        Projections.LiveStreamAggregation<Device>();
+        Projections.LiveStreamAggregation<DoorStatusSensor>();
+        Projections.LiveStreamAggregation<TemperatureAndHumiditySensor>();
 
         Projections.Add<DashboardViewProjection>(ProjectionLifecycle.Inline);
     }

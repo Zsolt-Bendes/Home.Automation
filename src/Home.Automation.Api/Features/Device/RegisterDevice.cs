@@ -1,7 +1,8 @@
 ﻿using FluentValidation;
-using Home.Automation.Api.Domain.Devices.Entities;
 using Home.Automation.Api.Domain.Devices.Events;
 using Home.Automation.Api.Domain.Devices.ValueObjects;
+using Home.Automation.Api.Domain.DoorSensor.ValueObjects;
+using Home.Automation.Api.Domain.TempAndHumiditySensors.Events;
 using Home.Automation.Api.Features.Dashboard.View;
 using Marten;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ using Wolverine.Http;
 namespace Home.Automation.Api.Features.Device;
 
 public sealed record RegisterDevice(
-    string Name,
+    string Label,
     SensorType SensorType,
     DoorSensorRequest? DoorSensor)
 {
@@ -19,9 +20,9 @@ public sealed record RegisterDevice(
     {
         public RegisterRoomValidator()
         {
-            RuleFor(_ => _.Name)
+            RuleFor(_ => _.Label)
                 .NotEmpty()
-                .MaximumLength(DeviceName._maxLength);
+                .MaximumLength(Domain.DoorSensor.ValueObjects.Label._maxLength);
             RuleFor(_ => _.DoorSensor)
                 .NotNull()
                 .When(_ => _.SensorType is SensorType.Door);
@@ -46,12 +47,12 @@ public static class RegisterDeviceEndpoint
         CancellationToken cancellationToken)
     {
         var deviceNameExists = await documentSession.Query<DashboardView>()
-            .AnyAsync(_ => _.Id == 1 && _.TemperatureSensors.Any(_ => _.Name == command.Name), cancellationToken);
+            .AnyAsync(_ => _.Id == 1 && _.TemperatureSensors.Any(_ => _.Name == command.Label), cancellationToken);
         if (deviceNameExists)
         {
             return new ProblemDetails
             {
-                Title = $"Device with {command.Name} name already exists",
+                Title = $"Sensor with {command.Label} label already exists",
                 Status = 400,
             };
         }
@@ -72,32 +73,21 @@ public static class RegisterDeviceEndpoint
         {
             _ = documentSession.Events.StartStream(
                 id,
-                new DeviceRegistered(
+                new DoorSensorRegistered(
                     id,
-                    new DeviceName(command.Name),
-                    SensorType.Door,
-                    new List<Sensor> { Domain.Devices.Entities.DoorStatusSensor.Create(
-                        Guid.NewGuid(),
-                        command.DoorSensor!.DoorStatus,
-                        command.DoorSensor.SendStatusChangeEmails,
-                        command.DoorSensor.OpenReminderTimeSpan) },
-                    timeProvider.GetLocalNow()));
+                    new Label(command.Label),
+                    command.DoorSensor!.DoorStatus,
+                    command.DoorSensor.SendStatusChangeEmails,
+                    command.DoorSensor.OpenReminderTimeSpan));
         }
 
         if (command.SensorType is SensorType.TemperatureAndHumidity)
         {
             _ = documentSession.Events.StartStream(
                 id,
-                new DeviceRegistered(
+                new TemperatureSensorRegistered(
                     id,
-                    new DeviceName(command.Name),
-
-                    command.SensorType,
-                    new List<Sensor> { new Domain.Devices.Entities.TemperatureAndHumiditySensor(
-                        Guid.NewGuid(),
-                        SensorType.TemperatureAndHumidity,
-                        new TemperatureAndHumidityMeasurement(0, 20)) },
-                    timeProvider.GetLocalNow()));
+                    new Label(command.Label)));
         }
 
         return new RegisterDeviceResponse(id);

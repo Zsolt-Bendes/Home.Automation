@@ -1,28 +1,60 @@
-﻿using Home.Automation.Api.Domain.Devices.Entities;
-using Home.Automation.Api.Domain.Devices.Events;
+﻿using Home.Automation.Api.Domain.Devices.Events;
 using Home.Automation.Api.Domain.Devices.IntegrationMessages;
 using Home.Automation.Api.Domain.Devices.ValueObjects;
+using Home.Automation.Api.Domain.DoorSensor;
+using Home.Automation.Api.Domain.DoorSensor.ValueObjects;
 using Home.Automation.Api.Services.Email;
+using Marten;
 using Wolverine;
 using Wolverine.Marten;
 
 namespace Home.Automation.Api.Features.Device;
 
-public sealed record UpdateGarageDoorStatus(Guid DeviceId, DoorStatus DoorStatus);
+public sealed record UpdateGarageDoorStatus(
+    Guid SensorId,
+    DoorStatus DoorStatus,
+    string? Label,
+    bool? SendStatusChangeEmails,
+    TimeSpan? OpenReminderTimeSpan);
 
 public static class UpdateDoorStatusHandler
 {
-    public static Events Handle(
+    public static async Task Handle(
         UpdateGarageDoorStatus command,
-        [WriteAggregate(nameof(UpdateGarageDoorStatus.DeviceId))] Domain.Devices.Device device,
-        TimeProvider timeProvider)
+        IMessageBus messageBus,
+        IDocumentSession documentSession,
+        TimeProvider timeProvider,
+        CancellationToken cancellationToken)
     {
-        if (command.DoorStatus is DoorStatus.Open)
+        var sensorStream = await documentSession
+            .Events
+            .FetchForWriting<DoorStatusSensor>(command.SensorId, cancellationToken);
+        if (sensorStream.Aggregate is null)
         {
-            return [new DoorOpened(command.DeviceId, timeProvider.GetLocalNow())];
+            documentSession.Events.StartStream<DoorStatusSensor>(
+                command.SensorId,
+                new DoorSensorRegistered(
+                    command.SensorId,
+                    new Label(command.Label!),
+                    command.DoorStatus,
+                    command.SendStatusChangeEmails!.Value,
+                    command.OpenReminderTimeSpan!.Value));
         }
 
-        return [new DoorClosed(command.DeviceId, timeProvider.GetLocalNow())];
+        if (command.DoorStatus is DoorStatus.Open)
+        {
+            var doorOpenedEvent = new DoorOpened(command.SensorId, timeProvider.GetLocalNow());
+            sensorStream.AppendOne(doorOpenedEvent);
+
+            await messageBus.PublishAsync(doorOpenedEvent);
+        }
+        else
+        {
+            var doorClosedEvent = new DoorClosed(command.SensorId, timeProvider.GetLocalNow());
+            sensorStream.AppendOne(doorClosedEvent);
+
+            await messageBus.PublishAsync(doorClosedEvent);
+        }
     }
 }
 
@@ -30,22 +62,24 @@ public static class DoorOpenedHandler
 {
     public static async Task Handle(
         DoorOpened evt,
-        [ReadAggregate] Domain.Devices.Device device,
+        [ReadAggregate(nameof(DoorClosed.SensorId))] DoorStatusSensor sensor,
         IEmailService emailService,
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        var sensor = device.Sensors.FirstOrDefault(_ => _.Type == SensorType.Door) as DoorStatusSensor;
-        if (sensor?.SendNotification is false)
+        if (sensor.SendNotification is false)
         {
             return;
         }
 
-        await emailService.SendGarageDoorStateChangeMailAsync(DoorStatus.Open, evt.HappenedAt, cancellationToken);
-        if (sensor?.OpenReminderTimeSpan is not null)
+        await emailService.SendGarageDoorStateChangeMailAsync(
+            DoorStatus.Open,
+            evt.HappenedAt,
+            cancellationToken);
+        if (sensor.OpenReminderTimeSpan is not null)
         {
             await messageBus.SendAsync(
-                new DoorNotClosed(evt.DeviceId)
+                new DoorNotClosed(evt.SensorId)
                 .DelayedFor(sensor.OpenReminderTimeSpan.Value));
         }
     }
@@ -55,17 +89,19 @@ public static class DoorClosedHandler
 {
     public static async Task Handle(
         DoorClosed evt,
-        [ReadAggregate] Domain.Devices.Device device,
+        [ReadAggregate(nameof(DoorClosed.SensorId))] DoorStatusSensor sensor,
         IEmailService emailService,
         CancellationToken cancellationToken)
     {
-        var sensor = device.Sensors.FirstOrDefault(_ => _.Type == SensorType.Door) as DoorStatusSensor;
-        if (sensor?.SendNotification is false)
+        if (sensor.SendNotification is false)
         {
             return;
         }
 
-        await emailService.SendGarageDoorStateChangeMailAsync(DoorStatus.Closed, evt.HappenedAt, cancellationToken);
+        await emailService.SendGarageDoorStateChangeMailAsync(
+            DoorStatus.Closed,
+            evt.HappenedAt,
+            cancellationToken);
     }
 }
 
@@ -73,19 +109,18 @@ public static class DoorNotClosedHandler
 {
     public static async Task Handle(
         DoorNotClosed evt,
-        [ReadAggregate] Domain.Devices.Device device,
+        [ReadAggregate(nameof(DoorClosed.SensorId))] DoorStatusSensor sensor,
         IEmailService emailService,
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        var sensor = device.Sensors.FirstOrDefault(_ => _.Type == SensorType.Door) as DoorStatusSensor;
-        if (sensor?.DoorStatus is DoorStatus.Open)
+        if (sensor.DoorStatus is DoorStatus.Open)
         {
             await emailService.SendGarageDoorOpenReminderMailAsync(cancellationToken);
-            if (sensor?.SendNotification is true && sensor?.OpenReminderTimeSpan is not null)
+            if (sensor.SendNotification && sensor?.OpenReminderTimeSpan is not null)
             {
                 await messageBus.SendAsync(
-                    new DoorNotClosed(evt.DeviceId)
+                    new DoorNotClosed(evt.SensorId)
                     .DelayedFor(sensor.OpenReminderTimeSpan.Value));
             }
         }

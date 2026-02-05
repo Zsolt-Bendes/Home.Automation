@@ -9,7 +9,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-builder.Services.AddHttpClient<DeviceHttpClient>(client =>
+builder.Services.AddHttpClient<SensorHttpClient>(client =>
     client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("WebApi")!));
 
 builder.Services.AddScoped<DeviceRepository>();

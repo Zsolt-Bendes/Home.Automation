@@ -20,6 +20,9 @@ public partial class Home : IAsyncDisposable
     protected override async Task OnInitializedAsync()
     {
         await _deviceRepository.LoadTempDevices(_cancellationTokenSource.Token);
+        await _deviceRepository.LoadDashboardAsync(_cancellationTokenSource.Token);
+
+        _logger.LogInformation(_deviceRepository.DashboardView.Id.ToString());
 
         _liveUpdaterService.GroupAddedHandler += UpdateTempSensor;
 
@@ -37,17 +40,16 @@ public partial class Home : IAsyncDisposable
 
     private void UpdateTempSensor(LiveTempData data)
     {
-        Console.WriteLine("ok");
         _logger.LogInformation(data.DeviceId.ToString());
-        var device = _deviceRepository.TemperatureDevices.Find(_ => _.Id == data.DeviceId);
+        var device = _deviceRepository.DashboardView.TemperatureSensors.Find(_ => _.Id == data.DeviceId);
         if (device is null)
         {
             Console.WriteLine("device not found");
             return;
         }
+        device.Current.Temperature = data.Temperature;
 
-        device.Temperature = data.Temperature;
-        device.Humidity = data.Humidity;
+        device.Current.Humidity = data.Humidity;
 
         StateHasChanged();
     }

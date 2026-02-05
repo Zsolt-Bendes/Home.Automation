@@ -2,6 +2,12 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
-  <Project Path="src/Home.Automation.Api/Home.Automation.Api.csproj" />
-  <Project Path="src/Home.Automation.WebClient/Home.Automation.WebClient.csproj" Id="ba6c29dc-23ab-4300-ab6c-4bd88d4842cb" />
+  <Folder Name="/src/">
+    <Project Path="src/Home.Automation.Api/Home.Automation.Api.csproj" />
+    <Project Path="src/Home.Automation.WebClient/Home.Automation.WebClient.csproj" Id="ba6c29dc-23ab-4300-ab6c-4bd88d4842cb" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Home.Automation.IntegrationTests/Home.Automation.IntegrationTests/Home.Automation.IntegrationTests.csproj" Id="b5c12775-b081-4573-9921-e6cb865d7e2b" />
+    <Project Path="tests/Home.Automation.UnitTests/Home.Automation.UnitTests.csproj" Id="0c829aa0-8db0-4f77-9f1e-bac03203b5a0" />
+  </Folder>
 </Solution>
