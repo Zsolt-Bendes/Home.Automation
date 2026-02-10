@@ -19,12 +19,11 @@ public partial class Home : IAsyncDisposable
 
     protected override async Task OnInitializedAsync()
     {
-        await _deviceRepository.LoadTempDevices(_cancellationTokenSource.Token);
         await _deviceRepository.LoadDashboardAsync(_cancellationTokenSource.Token);
 
-        _logger.LogInformation(_deviceRepository.DashboardView.Id.ToString());
-
         _liveUpdaterService.GroupAddedHandler += UpdateTempSensor;
+        _liveUpdaterService.DoorOpenedHandler += DoorOpened;
+        _liveUpdaterService.DoorClosedHandler += DoorClosed;
 
         await _liveUpdaterService.StartAsync(_cancellationTokenSource.Token);
         await base.OnInitializedAsync();
@@ -38,18 +37,47 @@ public partial class Home : IAsyncDisposable
         await _liveUpdaterService.DisposeAsync();
     }
 
-    private void UpdateTempSensor(LiveTempData data)
+    private void UpdateTempSensor(LiveTemperatureData data)
     {
-        _logger.LogInformation(data.DeviceId.ToString());
-        var device = _deviceRepository.DashboardView.TemperatureSensors.Find(_ => _.Id == data.DeviceId);
-        if (device is null)
+        _logger.LogInformation(data.SensorId.ToString());
+        var sensor = _deviceRepository.DashboardView!.TemperatureSensors.Find(_ => _.Id == data.SensorId);
+        if (sensor is null)
         {
-            Console.WriteLine("device not found");
             return;
         }
-        device.Current.Temperature = data.Temperature;
+        sensor.Current!.Temperature = data.Temperature;
+        sensor.Current.Humidity = data.Humidity;
 
-        device.Current.Humidity = data.Humidity;
+        sensor.TodayTemperature = new MinMaxAverage(data.MinTemp, data.MaxTemp, data.AvgTemp);
+        sensor.TodayHumidity = new MinMaxAverage(data.MinHumidity, data.MaxHumidity, data.AvgHumidity);
+
+        StateHasChanged();
+    }
+
+    private void DoorOpened(LiveDoorStatusData data)
+    {
+        var sensor = _deviceRepository.DashboardView!.DoorStatusSensors.Find(_ => _.Id == data.SensorId);
+        if (sensor is null)
+        {
+            return;
+        }
+
+        sensor.DoorStatus = data.DoorStatus;
+        sensor.OpenedAt = data.HappenedAt;
+
+        StateHasChanged();
+    }
+
+    private void DoorClosed(LiveDoorStatusData data)
+    {
+        var sensor = _deviceRepository.DashboardView!.DoorStatusSensors.Find(_ => _.Id == data.SensorId);
+        if (sensor is null)
+        {
+            return;
+        }
+
+        sensor.DoorStatus = data.DoorStatus;
+        sensor.ClosedAt = data.HappenedAt;
 
         StateHasChanged();
     }

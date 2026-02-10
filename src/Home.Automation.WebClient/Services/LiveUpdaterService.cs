@@ -23,10 +23,14 @@ public sealed class LiveUpdaterService : IAsyncDisposable
           .WithAutomaticReconnect()
           .Build();
 
-        _hubConnection.On<LiveTempData>("room_temp_update", response => GroupAddedHandler?.Invoke(response));
+        _hubConnection.On<LiveTemperatureData>("room_temp_update", response => GroupAddedHandler?.Invoke(response));
+        _hubConnection.On<LiveDoorStatusData>("door_sensor_opened", response => DoorOpenedHandler?.Invoke(response));
+        _hubConnection.On<LiveDoorStatusData>("door_sensor_closed", response => DoorClosedHandler?.Invoke(response));
     }
 
-    public event Action<LiveTempData>? GroupAddedHandler;
+    public event Action<LiveTemperatureData>? GroupAddedHandler;
+    public event Action<LiveDoorStatusData>? DoorOpenedHandler;
+    public event Action<LiveDoorStatusData>? DoorClosedHandler;
 
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
@@ -46,4 +50,18 @@ public sealed class LiveUpdaterService : IAsyncDisposable
     }
 }
 
-public sealed record LiveTempData(Guid DeviceId, double Temperature, double Humidity);
+public sealed record LiveTemperatureData(
+    Guid SensorId,
+    double Temperature,
+    double Humidity,
+    double MaxTemp,
+    double MinTemp,
+    double AvgTemp,
+    double MaxHumidity,
+    double MinHumidity,
+    double AvgHumidity);
+
+public sealed record LiveDoorStatusData(
+    Guid SensorId,
+    DoorStatus DoorStatus,
+    DateTimeOffset HappenedAt);

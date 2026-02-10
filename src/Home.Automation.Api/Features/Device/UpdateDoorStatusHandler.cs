@@ -3,9 +3,12 @@ using Home.Automation.Api.Domain.Devices.IntegrationMessages;
 using Home.Automation.Api.Domain.Devices.ValueObjects;
 using Home.Automation.Api.Domain.DoorSensor;
 using Home.Automation.Api.Domain.DoorSensor.ValueObjects;
+using Home.Automation.Api.Services;
 using Home.Automation.Api.Services.Email;
 using Marten;
+using Microsoft.AspNetCore.SignalR;
 using Wolverine;
+using Wolverine.Attributes;
 using Wolverine.Marten;
 
 namespace Home.Automation.Api.Features.Device;
@@ -83,6 +86,21 @@ public static class DoorOpenedHandler
                 .DelayedFor(sensor.OpenReminderTimeSpan.Value));
         }
     }
+
+    [WolverineAfter]
+    public async static Task SendUpdateToFrontendAsync(
+        DoorOpened evt,
+        IHubContext<LiveUpdater> liveUpdater,
+        CancellationToken cancellationToken)
+    {
+        await liveUpdater.Clients.All.SendAsync(
+            "door_sensor_opened",
+            new LiveDoorStatusData(
+                evt.SensorId,
+                DoorStatus.Open,
+                evt.HappenedAt),
+            cancellationToken);
+    }
 }
 
 public static class DoorClosedHandler
@@ -101,6 +119,21 @@ public static class DoorClosedHandler
         await emailService.SendGarageDoorStateChangeMailAsync(
             DoorStatus.Closed,
             evt.HappenedAt,
+            cancellationToken);
+    }
+
+    [WolverineAfter]
+    public async static Task SendUpdateToFrontendAsync(
+        DoorClosed evt,
+        IHubContext<LiveUpdater> liveUpdater,
+        CancellationToken cancellationToken)
+    {
+        await liveUpdater.Clients.All.SendAsync(
+            "door_sensor_closed",
+            new LiveDoorStatusData(
+                evt.SensorId,
+                DoorStatus.Closed,
+                evt.HappenedAt),
             cancellationToken);
     }
 }

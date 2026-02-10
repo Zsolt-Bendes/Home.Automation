@@ -1,25 +1,24 @@
 ﻿@page "/"
 
-@* @if (_deviceRepository.TemperatureDevices is not null)
-{
-	<div class="flex gap-2 flex-wrap">
-		@foreach (var item in _deviceRepository.TemperatureDevices)
-		{
-			<TemperatureSensor DeviceName=@item.Name
-							   Humidity=@item.Humidity
-							   Temperature=@item.Temperature />
-		}
-	</div>
-} *@
-
 @if (_deviceRepository.DashboardView is not null)
 {
-	<div class="flex gap-2 flex-wrap">
-		@foreach (var item in _deviceRepository.DashboardView.TemperatureSensors)
-		{
-			<TemperatureSensor DeviceName=@item.Name
-							   Humidity=@item.Current.Humidity
-							   Temperature=@item.Current.Temperature />
-		}
-	</div>
+	if (_deviceRepository.DashboardView.TemperatureSensors.Any())
+	{
+		<div class="flex gap-2 flex-wrap">
+			@foreach (var item in _deviceRepository.DashboardView.TemperatureSensors)
+			{
+				<TemperatureSensor SensorView=@item />
+			}
+		</div>
+	}
+
+	if (_deviceRepository.DashboardView.DoorStatusSensors.Any())
+	{
+		<div class="flex gap-2 flex-wrap">
+			@foreach (var item in _deviceRepository.DashboardView.DoorStatusSensors)
+			{
+				<DoorSensor DoorStatus=@item />
+			}
+		</div>
+	}
 }

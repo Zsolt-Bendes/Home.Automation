@@ -1,26 +1,119 @@
-﻿<div class="border-1 h-20 w-fit m-3 bg-gray rounded border-gray-500 bg-gray-300 outline-offset-2">
+﻿@using Home.Automation.WebClient.Services
+<div class="border-1 m-3 bg-gray rounded border-gray-500 bg-gray-700 outline-offset-2 text-gray-200">
+
+	<div class="flex mb-1 flex-col items-center">
+		<span class="text-base">@SensorView.Name</span>
+		<span class="text-sm">Current</span>
+	</div>
+
 	<div class="flex justify-center px-2 gap-2">
-		<div class="flex flex-col justify-center items-center">
-			<span class="text-2xl font-bold">@Temperature&deg;C</span>
+		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
 			<span class="text-sm">Temperature</span>
+			@if (SensorView.Current is null)
+			{
+				<span class="text-2xl font-bold">N/A</span>
+			}
+			else
+			{
+				<span class="text-2xl font-bold">@SensorView.Current.Temperature&deg;C</span>
+			}
+			
 		</div>
-		<div class="flex flex-col justify-center items-center">
-			<span class="text-2xl font-bold">@Humidity%</span>
+		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
 			<span class="text-sm">Humidity</span>
+			@if (SensorView.Current is null)
+			{
+				<span class="text-2xl font-bold">N/A</span>
+			}
+			else
+			{
+				<span class="text-2xl font-bold">@SensorView.Current.Humidity%</span>
+			}
+			
+		</div>
+
+	</div>
+
+	<div class="flex justify-center mt-2">
+		<span class="text-base">Daily statistics</span>
+	</div>
+
+	<div class="flex flex-col justify-center items-center bg-black rounded p-2 m-2">
+		<span class="text-sm">Average humidity today</span>
+		@if (SensorView.Current is null)
+		{
+			<span class="text-2xl font-bold">N/A</span>
+		}
+		else
+		{
+			<span class="text-2xl font-bold">@SensorView.TodayHumidity.Average.ToString("0.##")%</span>
+		}
+	</div>
+
+	<div class="flex justify-center px-2 gap-2 mb-2">
+		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
+			<span class="text-sm">Min Humidity</span>
+			@if (SensorView.Current is null)
+			{
+				<span class="text-2xl font-bold">N/A</span>
+			}
+			else
+			{
+				<span class="text-2xl font-bold">@SensorView.TodayHumidity.Min%</span>
+			}
+		</div>
+		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
+			<span class="text-sm">Max Humidity</span>
+			@if (SensorView.Current is null)
+			{
+				<span class="text-2xl font-bold">N/A</span>
+			}
+			else
+			{
+				<span class="text-2xl font-bold">@SensorView.TodayHumidity.Max%</span>
+			}
 		</div>
 	</div>
-	<div class="flex justify-center">
-		<span class="text-base">@DeviceName</span>
+
+	<div class="flex flex-col justify-center items-center bg-black rounded p-2 m-2">
+		<span class="text-sm">Average temperature today</span>
+		@if (SensorView.Current is null)
+		{
+			<span class="text-2xl font-bold">N/A</span>
+		}
+		else
+		{
+			<span class="text-2xl font-bold">@SensorView.TodayTemperature.Average.ToString("0.##")&deg;C</span>
+		}
+	</div>
+
+	<div class="flex justify-center px-2 gap-2 mb-2">
+		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
+			<span class="text-sm">Min temperature</span>
+			@if (SensorView.Current is null)
+			{
+				<span class="text-2xl font-bold">N/A</span>
+			}
+			else
+			{
+				<span class="text-2xl font-bold">@SensorView.TodayTemperature.Min&deg;C</span>
+			}
+		</div>
+		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
+			<span class="text-sm text-nowrap">Max temperature</span>
+			@if (SensorView.Current is null)
+			{
+				<span class="text-2xl font-bold">N/A</span>
+			}
+			else
+			{
+				<span class="text-2xl font-bold">@SensorView.TodayTemperature.Max&deg;C</span>
+			}
+		</div>
 	</div>
 </div>
 
 @code {
 	[Parameter, EditorRequired]
-	public string DeviceName { get; set; }
-
-	[Parameter]
-	public double? Humidity { get; set; }
-
-	[Parameter]
-	public double? Temperature { get; set; }
+	public TemperatureAndHumiditySensorView SensorView { get; set; }
 }

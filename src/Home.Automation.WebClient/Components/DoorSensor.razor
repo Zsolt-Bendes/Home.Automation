@@ -1,0 +1,42 @@
+﻿@using Home.Automation.WebClient.Services
+
+<div class="border-1 m-3 bg-gray rounded border-gray-500 bg-gray-700 outline-offset-2 text-gray-200 w-fit">
+
+	<div class="flex mb-1 flex-col items-center">
+		<span class="text-base">@DoorStatus.Name</span>
+	</div>
+
+	<div class="flex flex-col bg-black rounded gap-1 m-2 items-center p-2">
+		@if (DoorStatus.DoorStatus is Services.DoorStatus.Open)
+		{
+
+			<span class="text-2xl text-red-200 ">OPEN</span>
+			@if (DoorStatus.OpenedAt is not null)
+			{
+				<div class="flex flex-col">
+					opened at:
+					<span class="text-sm"> @DoorStatus.OpenedAt.Value.DateTime.ToShortDateString()</span>
+					<span class="text-sm"> @DoorStatus.OpenedAt.Value.DateTime.ToLongTimeString()</span>
+				</div>
+			}
+		}
+		else
+		{
+			<span class="text-xl text-green-200 ">CLOSED</span>
+			@if (DoorStatus.ClosedAt is not null)
+			{
+				<div class="flex flex-col items-end">
+					<span class="text-sm w-full -mb-1 text-gray-500">closed at:</span>
+					<span class="text-base"> @DoorStatus.ClosedAt.Value.DateTime.ToShortDateString()</span>
+					<span class="text-base -mt-2"> @DoorStatus.ClosedAt.Value.DateTime.ToLongTimeString()</span>
+				</div>
+			}
+		}
+	</div>
+</div>
+
+
+@code {
+	[Parameter, EditorRequired]
+	public DoorStatusSensor DoorStatus { get; set; }
+}
