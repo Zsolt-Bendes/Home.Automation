@@ -1,6 +1,10 @@
 ﻿using Home.Automation.Api.Domain.TempAndHumiditySensors;
 using Home.Automation.Api.Domain.TempAndHumiditySensors.Events;
+using Home.Automation.Api.Features.Dashboard;
+using Home.Automation.Api.Features.Dashboard.View;
 using Home.Automation.UnitTests.Builders;
+using Marten;
+using NSubstitute;
 
 namespace Home.Automation.UnitTests;
 
@@ -160,5 +164,26 @@ public sealed class When_temperature_measurement_received
         // Assert
         Assert.That(sensor!.AverageTemperature).IsEqualTo(evt1.TemperatureInCelsius + evt2.TemperatureInCelsius / 2);
         Assert.That(sensor!.AverageHumidity).IsEqualTo(evt1.Humidity + evt2.Humidity / 2);
+    }
+
+    [Test]
+    public async Task Given_sensor_exists_then_dashboard_is_updated()
+    {
+        // Arrange
+        var sensorId = Guid.NewGuid();
+        var measurementEvt = new TemperatureMeasurementReceived(sensorId, 15, 20, DateTimeOffset.UtcNow);
+
+        var dashboardView = new DashboardView();
+        dashboardView.TemperatureSensors.Add(new TemperatureAndHumiditySensorView(sensorId, "a name"));
+
+        IDocumentOperations ops = Substitute.For<IDocumentOperations>();
+        ops.LoadAsync<DashboardView>(1, CancellationToken.None).Returns(await Task.FromResult(dashboardView));
+
+        // Act
+        var projection = new DashboardViewProjection();
+        await projection.Project(measurementEvt, ops);
+
+        // Assert
+        await Assert.That(dashboardView.TemperatureSensors[0].TodayTemperature.Min).IsGreaterThan(0);
     }
 }

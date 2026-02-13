@@ -10,14 +10,14 @@ namespace Internal.Generated.WolverineHandlers
     [global::System.CodeDom.Compiler.GeneratedCode("JasperFx", "1.0.0")]
     public sealed class DoorNotClosedHandler1336420176 : Wolverine.Runtime.Handlers.MessageHandler
     {
-        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.IntegrationMessages.DoorNotClosed> _loggerForMessage;
+        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly Microsoft.Extensions.DependencyInjection.IServiceScopeFactory _serviceScopeFactory;
 
-        public DoorNotClosedHandler1336420176(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.IntegrationMessages.DoorNotClosed> loggerForMessage, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory)
+        public DoorNotClosedHandler1336420176(Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.IntegrationMessages.DoorNotClosed> loggerForMessage, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory)
         {
-            _outboxedSessionFactory = outboxedSessionFactory;
             _loggerForMessage = loggerForMessage;
+            _outboxedSessionFactory = outboxedSessionFactory;
             _serviceScopeFactory = serviceScopeFactory;
         }
 
@@ -39,9 +39,9 @@ namespace Internal.Generated.WolverineHandlers
 
             System.Diagnostics.Activity.Current?.SetTag("message.handler", "Home.Automation.Api.Features.Device.DoorNotClosedHandler");
             var doorStatusSensor = await documentSession.Events.FetchLatest<Home.Automation.Api.Domain.DoorSensor.DoorStatusSensor>(((Home.Automation.Api.Domain.Devices.IntegrationMessages.DoorNotClosed)context.Envelope.Message).SensorId, cancellation);
-            var result_of_Assert2 = Wolverine.Runtime.Handlers.EntityIsNotNullGuard<Home.Automation.Api.Domain.DoorSensor.DoorStatusSensor>.Assert(doorStatusSensor, ((Microsoft.Extensions.Logging.ILogger)_loggerForMessage), "doorStatusSensor", context.Envelope);
+            var result_of_Assert1 = Wolverine.Runtime.Handlers.EntityIsNotNullGuard<Home.Automation.Api.Domain.DoorSensor.DoorStatusSensor>.Assert(doorStatusSensor, ((Microsoft.Extensions.Logging.ILogger)_loggerForMessage), "doorStatusSensor", context.Envelope);
             // Evaluate whether or not the execution should stop based on the HandlerContinuation value
-            if (result_of_Assert2 == Wolverine.HandlerContinuation.Stop) return;
+            if (result_of_Assert1 == Wolverine.HandlerContinuation.Stop) return;
             
             // The actual message execution
             await Home.Automation.Api.Features.Device.DoorNotClosedHandler.Handle(doorNotClosed, doorStatusSensor, emailService, context, cancellation).ConfigureAwait(false);

@@ -15,6 +15,14 @@ public static class StatisticsCalculator
         double sumOfHumidity,
         TemperatureMeasurementReceived newMeasurement)
     {
+        if (prevMeasurementDate is null)
+        {
+            minTemperature = newMeasurement.TemperatureInCelsius;
+            minHumidity = newMeasurement.Humidity;
+            maxTemperature = newMeasurement.TemperatureInCelsius;
+            maxHumidity = newMeasurement.Humidity;
+        }
+
         if (prevMeasurementDate?.Day == newMeasurement.MeasuredAt.Day)
         {
             prevMeasurementCount++;

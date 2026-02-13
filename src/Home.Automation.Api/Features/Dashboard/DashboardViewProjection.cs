@@ -48,11 +48,6 @@ public sealed class DashboardViewProjection : EventProjection
             return;
         }
 
-        sensor.Current = new TemperatureAndHumidityMeasurement(
-            evt.TemperatureInCelsius,
-            evt.Humidity,
-            evt.MeasuredAt);
-
         var statistics = StatisticsCalculator.CalculateStatistics(
             sensor.Current?.MeasuredAt,
             sensor.DailyMeasurementCount,
@@ -63,6 +58,11 @@ public sealed class DashboardViewProjection : EventProjection
             sensor.TodayHumidity.Max,
             sensor.SumOfHumidity,
             evt);
+
+        sensor.Current = new TemperatureAndHumidityMeasurement(
+          evt.TemperatureInCelsius,
+          evt.Humidity,
+          evt.MeasuredAt);
 
         sensor.DailyMeasurementCount = statistics.MeasurementCounter;
         sensor.SumOfHumidity = statistics.DailySumOfHumidity;

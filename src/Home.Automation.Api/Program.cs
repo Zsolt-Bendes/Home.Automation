@@ -70,7 +70,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "_myAllowSpecificOrigins",
                       policy =>
                       {
-                          policy.AllowAnyOrigin()
+                          policy
+                            .WithOrigins(["http://raspberrypi.local:8080"])
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                       });
@@ -85,7 +86,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("_myAllowSpecificOrigins");
 
-app.MapHub<LiveUpdater>("/dashboard/live");
+app.MapHub<LiveUpdater>("/dashboard/live").RequireCors("_myAllowSpecificOrigins");
 
 app.MapWolverineEndpoints(opts =>
 {

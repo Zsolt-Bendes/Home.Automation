@@ -18,6 +18,7 @@ MQTTClient mqtt = MQTTClient(256);
 AM2302::AM2302_Sensor am2302(DHT22_PIN);
 
 void setup() {
+  delay(100);
   Serial.begin(115200);
 
   WiFi.mode(WIFI_STA);
@@ -45,7 +46,7 @@ void setup() {
 
   // Graceful disconnect
   mqtt.disconnect();
-  delay(50);
+  delay(80);
   WiFi.disconnect(true);
 
   esp_sleep_enable_timer_wakeup(SLEEP_TIME);
@@ -108,7 +109,7 @@ void connectToMQTT() {
 
 void sendToMQTT(float tempInC, float humidity) {
   StaticJsonDocument<200> message;
-  message["DeviceId"] = DeviceId;
+  message["SensorId"] = DeviceId;
   message["Temperature"] = tempInC;
   message["Humidity"] = humidity;
 

@@ -11,17 +11,17 @@ namespace Internal.Generated.WolverineHandlers
     [global::System.CodeDom.Compiler.GeneratedCode("JasperFx", "1.0.0")]
     public sealed class DoorClosedHandler620458940 : Wolverine.Runtime.Handlers.MessageHandler
     {
-        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
-        private readonly Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> _hubContext;
-        private readonly Microsoft.Extensions.DependencyInjection.IServiceScopeFactory _serviceScopeFactory;
         private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.Events.DoorClosed> _loggerForMessage;
+        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
+        private readonly Microsoft.Extensions.DependencyInjection.IServiceScopeFactory _serviceScopeFactory;
+        private readonly Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> _hubContextOfLiveUpdater;
 
-        public DoorClosedHandler620458940(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> hubContext, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.Events.DoorClosed> loggerForMessage)
+        public DoorClosedHandler620458940(Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.Events.DoorClosed> loggerForMessage, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory, Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> hubContextOfLiveUpdater)
         {
-            _outboxedSessionFactory = outboxedSessionFactory;
-            _hubContext = hubContext;
-            _serviceScopeFactory = serviceScopeFactory;
             _loggerForMessage = loggerForMessage;
+            _outboxedSessionFactory = outboxedSessionFactory;
+            _serviceScopeFactory = serviceScopeFactory;
+            _hubContextOfLiveUpdater = hubContextOfLiveUpdater;
         }
 
 
@@ -49,7 +49,7 @@ namespace Internal.Generated.WolverineHandlers
             // The actual message execution
             await Home.Automation.Api.Features.Device.DoorClosedHandler.Handle(doorClosed, doorStatusSensor, emailService, cancellation).ConfigureAwait(false);
 
-            await Home.Automation.Api.Features.Device.DoorClosedHandler.SendUpdateToFrontendAsync(doorClosed, _hubContext, cancellation).ConfigureAwait(false);
+            await Home.Automation.Api.Features.Device.DoorClosedHandler.SendUpdateToFrontendAsync(doorClosed, _hubContextOfLiveUpdater, cancellation).ConfigureAwait(false);
         }
 
     }

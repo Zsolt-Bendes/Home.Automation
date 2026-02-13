@@ -12,16 +12,16 @@ namespace Internal.Generated.WolverineHandlers
     public sealed class DoorOpenedHandler296233781 : Wolverine.Runtime.Handlers.MessageHandler
     {
         private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
-        private readonly Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> _hubContext;
-        private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.Events.DoorOpened> _loggerForMessage;
         private readonly Microsoft.Extensions.DependencyInjection.IServiceScopeFactory _serviceScopeFactory;
+        private readonly Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> _hubContextOfLiveUpdater;
+        private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.Events.DoorOpened> _loggerForMessage;
 
-        public DoorOpenedHandler296233781(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> hubContext, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.Events.DoorOpened> loggerForMessage, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory)
+        public DoorOpenedHandler296233781(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory, Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> hubContextOfLiveUpdater, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.Events.DoorOpened> loggerForMessage)
         {
             _outboxedSessionFactory = outboxedSessionFactory;
-            _hubContext = hubContext;
-            _loggerForMessage = loggerForMessage;
             _serviceScopeFactory = serviceScopeFactory;
+            _hubContextOfLiveUpdater = hubContextOfLiveUpdater;
+            _loggerForMessage = loggerForMessage;
         }
 
 
@@ -49,7 +49,7 @@ namespace Internal.Generated.WolverineHandlers
             // The actual message execution
             await Home.Automation.Api.Features.Device.DoorOpenedHandler.Handle(doorOpened, doorStatusSensor, emailService, context, cancellation).ConfigureAwait(false);
 
-            await Home.Automation.Api.Features.Device.DoorOpenedHandler.SendUpdateToFrontendAsync(doorOpened, _hubContext, cancellation).ConfigureAwait(false);
+            await Home.Automation.Api.Features.Device.DoorOpenedHandler.SendUpdateToFrontendAsync(doorOpened, _hubContextOfLiveUpdater, cancellation).ConfigureAwait(false);
         }
 
     }
