@@ -11,17 +11,17 @@ namespace Internal.Generated.WolverineHandlers
     [global::System.CodeDom.Compiler.GeneratedCode("JasperFx", "1.0.0")]
     public sealed class TemperatureMeasurementHandler1645683301 : Wolverine.Runtime.Handlers.MessageHandler
     {
-        private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Features.Device.TemperatureMeasurement> _loggerForMessage;
         private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
-        private readonly System.TimeProvider _timeProvider;
         private readonly Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> _hubContextOfLiveUpdater;
+        private readonly System.TimeProvider _timeProvider;
+        private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Features.Device.TemperatureMeasurement> _loggerForMessage;
 
-        public TemperatureMeasurementHandler1645683301(Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Features.Device.TemperatureMeasurement> loggerForMessage, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, System.TimeProvider timeProvider, Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> hubContextOfLiveUpdater)
+        public TemperatureMeasurementHandler1645683301(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> hubContextOfLiveUpdater, System.TimeProvider timeProvider, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Features.Device.TemperatureMeasurement> loggerForMessage)
         {
-            _loggerForMessage = loggerForMessage;
             _outboxedSessionFactory = outboxedSessionFactory;
-            _timeProvider = timeProvider;
             _hubContextOfLiveUpdater = hubContextOfLiveUpdater;
+            _timeProvider = timeProvider;
+            _loggerForMessage = loggerForMessage;
         }
 
 

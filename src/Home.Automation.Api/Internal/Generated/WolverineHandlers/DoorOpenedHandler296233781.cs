@@ -11,17 +11,17 @@ namespace Internal.Generated.WolverineHandlers
     [global::System.CodeDom.Compiler.GeneratedCode("JasperFx", "1.0.0")]
     public sealed class DoorOpenedHandler296233781 : Wolverine.Runtime.Handlers.MessageHandler
     {
-        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly Microsoft.Extensions.DependencyInjection.IServiceScopeFactory _serviceScopeFactory;
-        private readonly Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> _hubContextOfLiveUpdater;
+        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.Events.DoorOpened> _loggerForMessage;
+        private readonly Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> _hubContextOfLiveUpdater;
 
-        public DoorOpenedHandler296233781(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory, Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> hubContextOfLiveUpdater, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.Events.DoorOpened> loggerForMessage)
+        public DoorOpenedHandler296233781(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Domain.Devices.Events.DoorOpened> loggerForMessage, Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> hubContextOfLiveUpdater)
         {
-            _outboxedSessionFactory = outboxedSessionFactory;
             _serviceScopeFactory = serviceScopeFactory;
-            _hubContextOfLiveUpdater = hubContextOfLiveUpdater;
+            _outboxedSessionFactory = outboxedSessionFactory;
             _loggerForMessage = loggerForMessage;
+            _hubContextOfLiveUpdater = hubContextOfLiveUpdater;
         }
 
 
@@ -41,13 +41,13 @@ namespace Internal.Generated.WolverineHandlers
             var doorOpened = (Home.Automation.Api.Domain.Devices.Events.DoorOpened)context.Envelope.Message;
 
             System.Diagnostics.Activity.Current?.SetTag("message.handler", "Home.Automation.Api.Features.Device.DoorOpenedHandler");
-            var doorStatusSensor = await documentSession.Events.FetchLatest<Home.Automation.Api.Domain.DoorSensor.DoorStatusSensor>(((Home.Automation.Api.Domain.Devices.Events.DoorOpened)context.Envelope.Message).SensorId, cancellation);
-            var result_of_Assert3 = Wolverine.Runtime.Handlers.EntityIsNotNullGuard<Home.Automation.Api.Domain.DoorSensor.DoorStatusSensor>.Assert(doorStatusSensor, ((Microsoft.Extensions.Logging.ILogger)_loggerForMessage), "doorStatusSensor", context.Envelope);
+            var sensor = await documentSession.Events.FetchLatest<Home.Automation.Api.Domain.DoorSensor.DoorStatusSensor>(((Home.Automation.Api.Domain.Devices.Events.DoorOpened)context.Envelope.Message).SensorId, cancellation);
+            var result_of_Assert3 = Wolverine.Runtime.Handlers.EntityIsNotNullGuard<Home.Automation.Api.Domain.DoorSensor.DoorStatusSensor>.Assert(sensor, ((Microsoft.Extensions.Logging.ILogger)_loggerForMessage), "sensor", context.Envelope);
             // Evaluate whether or not the execution should stop based on the HandlerContinuation value
             if (result_of_Assert3 == Wolverine.HandlerContinuation.Stop) return;
             
             // The actual message execution
-            await Home.Automation.Api.Features.Device.DoorOpenedHandler.Handle(doorOpened, doorStatusSensor, emailService, context, cancellation).ConfigureAwait(false);
+            await Home.Automation.Api.Features.Device.DoorOpenedHandler.Handle(doorOpened, sensor, emailService, context, cancellation).ConfigureAwait(false);
 
             await Home.Automation.Api.Features.Device.DoorOpenedHandler.SendUpdateToFrontendAsync(doorOpened, _hubContextOfLiveUpdater, cancellation).ConfigureAwait(false);
         }

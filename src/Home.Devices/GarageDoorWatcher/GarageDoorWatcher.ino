@@ -70,8 +70,7 @@ void setup() {
   // Graceful disconnect
   mqtt.disconnect();
   delay(50);
-  WiFi.mode(WIFI_OFF);
-
+  
   esp_deep_sleep_start();
 }
 
@@ -100,13 +99,17 @@ void connectToMQTT() {
 
 void sendToMQTT(bool doorStatus) {
   StaticJsonDocument<200> message;
-  message["DeviceId"] = DeviceId;
+  message["SensorId"] = DeviceId;
   if (doorStatus) {
     message["DoorStatus"] = 0;
   } else {
     message["DoorStatus"] = 1;
   }
 
+  message["Label"] = "Garage door";
+  message["SendStatusChangeEmails"] = true;
+  message["OpenReminderTimeSpan"] = "0.00:10:00";
+  
   char messageBuffer[512];
   serializeJson(message, messageBuffer);
 
@@ -123,8 +126,7 @@ void WiFiEvent(WiFiEvent_t event) {
   switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
       Serial.println("WiFi lost connection");
-      WiFi.disconnect(true);
-      ConnectToWifi();
+      esp_restart();
       break;
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
       Serial.print("Connected. IP: ");

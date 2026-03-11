@@ -16,19 +16,19 @@ namespace Internal.Generated.WolverineHandlers
     public sealed class POST_devices_register : Wolverine.Http.HttpHandler
     {
         private readonly Wolverine.Http.WolverineHttpOptions _wolverineHttpOptions;
-        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly Wolverine.Runtime.IWolverineRuntime _wolverineRuntime;
-        private readonly System.TimeProvider _timeProvider;
+        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly FluentValidation.IValidator<Home.Automation.Api.Features.Device.RegisterDevice> _validatorOfRegisterDevice;
+        private readonly System.TimeProvider _timeProvider;
         private readonly Wolverine.Http.FluentValidation.IProblemDetailSource<Home.Automation.Api.Features.Device.RegisterDevice> _problemDetailSourceOfRegisterDevice;
 
-        public POST_devices_register(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Wolverine.Runtime.IWolverineRuntime wolverineRuntime, System.TimeProvider timeProvider, FluentValidation.IValidator<Home.Automation.Api.Features.Device.RegisterDevice> validatorOfRegisterDevice, Wolverine.Http.FluentValidation.IProblemDetailSource<Home.Automation.Api.Features.Device.RegisterDevice> problemDetailSourceOfRegisterDevice) : base(wolverineHttpOptions)
+        public POST_devices_register(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Runtime.IWolverineRuntime wolverineRuntime, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, FluentValidation.IValidator<Home.Automation.Api.Features.Device.RegisterDevice> validatorOfRegisterDevice, System.TimeProvider timeProvider, Wolverine.Http.FluentValidation.IProblemDetailSource<Home.Automation.Api.Features.Device.RegisterDevice> problemDetailSourceOfRegisterDevice) : base(wolverineHttpOptions)
         {
             _wolverineHttpOptions = wolverineHttpOptions;
-            _outboxedSessionFactory = outboxedSessionFactory;
             _wolverineRuntime = wolverineRuntime;
-            _timeProvider = timeProvider;
+            _outboxedSessionFactory = outboxedSessionFactory;
             _validatorOfRegisterDevice = validatorOfRegisterDevice;
+            _timeProvider = timeProvider;
             _problemDetailSourceOfRegisterDevice = problemDetailSourceOfRegisterDevice;
         }
 

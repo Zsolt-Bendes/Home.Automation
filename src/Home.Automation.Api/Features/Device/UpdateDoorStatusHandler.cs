@@ -42,6 +42,7 @@ public static class UpdateDoorStatusHandler
                     command.DoorStatus,
                     command.SendStatusChangeEmails!.Value,
                     command.OpenReminderTimeSpan!.Value));
+            await documentSession.SaveChangesAsync(cancellationToken);
         }
 
         if (command.DoorStatus is DoorStatus.Open)
