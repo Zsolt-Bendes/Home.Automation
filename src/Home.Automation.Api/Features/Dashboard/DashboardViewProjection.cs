@@ -8,7 +8,7 @@ using Marten.Events.Projections;
 
 namespace Home.Automation.Api.Features.Dashboard;
 
-public sealed class DashboardViewProjection : EventProjection
+public sealed partial class DashboardViewProjection : EventProjection
 {
     public async Task Project(DoorSensorRegistered evt, IDocumentOperations ops)
     {

@@ -4,6 +4,7 @@ using Home.Automation.Api.Features.Device;
 using Home.Automation.Api.Infrastructure;
 using Home.Automation.Api.Services;
 using JasperFx;
+using JasperFx.CodeGeneration;
 using JasperFx.Core;
 using Npgsql;
 using Wolverine;
@@ -22,6 +23,8 @@ builder.Logging.AddSimpleConsole(opts => opts.TimestampFormat = "yyyy.MM.dd HH:m
 
 builder.Host.UseWolverine(opts =>
 {
+    opts.CodeGeneration.TypeLoadMode = TypeLoadMode.Static;
+
     var rabbitMqConnectionString = builder.Configuration.GetConnectionString("rabbitMq");
     opts.UseRabbitMq(new Uri(rabbitMqConnectionString!))
             .DisableSystemRequestReplyQueueDeclaration()
@@ -71,7 +74,7 @@ builder.Services.AddCors(options =>
                       policy =>
                       {
                           policy
-                            .WithOrigins(["http://raspberrypi.local:8080"])
+                            .WithOrigins(["http://raspberrypi.local:8080", "http://localhost:5180"])
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                       });

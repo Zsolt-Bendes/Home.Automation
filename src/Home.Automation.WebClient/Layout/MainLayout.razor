@@ -1,3 +1,17 @@
-﻿@inherits LayoutComponentBase
+﻿@using BlazorBlueprint.Primitives.Services
+@inherits LayoutComponentBase
 
-@Body
+<div class="page">
+    <main class="flex flex-col items-center">
+        @Body
+    </main>
+</div>
+
+<!-- Required for portal-based components (Popover, Dialog, Select, etc.) -->
+<BbPortalHost />
+
+<!-- Required if you use ToastService to show toasts -->
+<BbToastProvider />
+
+<!-- Required if you use DialogService for programmatic confirm dialogs -->
+<BbDialogProvider />

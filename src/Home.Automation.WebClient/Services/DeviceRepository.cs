@@ -40,7 +40,30 @@ public class DeviceRepository
 
         return TemperatureDevices.Find(_ => _.Id == id);
     }
+
+    public async Task<PastState> GetAggregatedStatsAsync(Filter filter, Guid deviceId, CancellationToken cancellationToken)
+    {
+        return await _deviceHttpClient.GetAggregatedStatsAsync(filter, deviceId, cancellationToken);
+    }
 }
+
+public enum Filter
+{
+    Last24Hours,
+    PrevWeek,
+    PrevMonth,
+}
+
+public sealed record State(
+    DateTimeOffset TimeStamp,
+    double TemperatureInCelsius,
+    double Humidity)
+{
+    public string Hours => TimeStamp.ToString("hh:mm");
+    public string DateTime => TimeStamp.DateTime.ToShortDateString();
+}
+
+public sealed record PastState(IReadOnlyList<State> States);
 
 public abstract class DeviceBase
 {
@@ -83,6 +106,12 @@ public sealed class SensorHttpClient
     {
         return await _httpClient.GetFromJsonAsync<DashboardView>("/dashboard", _serializerOptions, cancellationToken);
     }
+
+    internal async Task<PastState> GetAggregatedStatsAsync(Filter filter, Guid deviceId, CancellationToken cancellationToken)
+    {
+        return await _httpClient.GetFromJsonAsync<PastState>($"/dashboard/aggregated-stats?filter={filter.ToString()}&deviceId={deviceId}", _serializerOptions, cancellationToken)
+            ?? new PastState([]);
+    }
 }
 
 public sealed class DoorStatusSensor : DeviceBase
@@ -114,6 +143,9 @@ public sealed class TemperatureAndHumiditySensorView : DeviceBase
 
     public double SumOfHumidity { get; set; }
     public double SumOfTemperature { get; set; }
+
+    public PastState? PastState { get; set; }
+    public Filter GraphView { get; set; } = Filter.Last24Hours;
 }
 
 public struct MinMaxAverage

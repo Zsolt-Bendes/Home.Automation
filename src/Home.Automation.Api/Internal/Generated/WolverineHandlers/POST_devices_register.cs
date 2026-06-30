@@ -16,20 +16,20 @@ namespace Internal.Generated.WolverineHandlers
     public sealed class POST_devices_register : Wolverine.Http.HttpHandler
     {
         private readonly Wolverine.Http.WolverineHttpOptions _wolverineHttpOptions;
-        private readonly Wolverine.Runtime.IWolverineRuntime _wolverineRuntime;
-        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly FluentValidation.IValidator<Home.Automation.Api.Features.Device.RegisterDevice> _validatorOfRegisterDevice;
         private readonly System.TimeProvider _timeProvider;
         private readonly Wolverine.Http.FluentValidation.IProblemDetailSource<Home.Automation.Api.Features.Device.RegisterDevice> _problemDetailSourceOfRegisterDevice;
+        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
+        private readonly Wolverine.Runtime.IWolverineRuntime _wolverineRuntime;
 
-        public POST_devices_register(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Runtime.IWolverineRuntime wolverineRuntime, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, FluentValidation.IValidator<Home.Automation.Api.Features.Device.RegisterDevice> validatorOfRegisterDevice, System.TimeProvider timeProvider, Wolverine.Http.FluentValidation.IProblemDetailSource<Home.Automation.Api.Features.Device.RegisterDevice> problemDetailSourceOfRegisterDevice) : base(wolverineHttpOptions)
+        public POST_devices_register(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, FluentValidation.IValidator<Home.Automation.Api.Features.Device.RegisterDevice> validatorOfRegisterDevice, System.TimeProvider timeProvider, Wolverine.Http.FluentValidation.IProblemDetailSource<Home.Automation.Api.Features.Device.RegisterDevice> problemDetailSourceOfRegisterDevice, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Wolverine.Runtime.IWolverineRuntime wolverineRuntime) : base(wolverineHttpOptions)
         {
             _wolverineHttpOptions = wolverineHttpOptions;
-            _wolverineRuntime = wolverineRuntime;
-            _outboxedSessionFactory = outboxedSessionFactory;
             _validatorOfRegisterDevice = validatorOfRegisterDevice;
             _timeProvider = timeProvider;
             _problemDetailSourceOfRegisterDevice = problemDetailSourceOfRegisterDevice;
+            _outboxedSessionFactory = outboxedSessionFactory;
+            _wolverineRuntime = wolverineRuntime;
         }
 
 
@@ -54,6 +54,7 @@ namespace Internal.Generated.WolverineHandlers
             }
 
 
+            System.Diagnostics.Activity.Current?.SetTag("handler.type", "Home.Automation.Api.Features.Device.RegisterDeviceEndpoint");
             var problemDetails2 = await Home.Automation.Api.Features.Device.RegisterDeviceEndpoint.LoadAsync(command, documentSession, httpContext.RequestAborted).ConfigureAwait(false);
             // Evaluate whether the processing should stop if there are any problems
             if (!(ReferenceEquals(problemDetails2, Wolverine.Http.WolverineContinue.NoProblems)))

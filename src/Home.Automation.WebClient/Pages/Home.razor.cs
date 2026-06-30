@@ -9,6 +9,8 @@ public partial class Home : IAsyncDisposable
     private readonly ILogger<Home> _logger;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
+
+
     public Home(DeviceRepository deviceRepository, LiveUpdaterService liveUpdaterService, ILogger<Home> logger)
     {
         _deviceRepository = deviceRepository;
@@ -32,24 +34,28 @@ public partial class Home : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         _liveUpdaterService.GroupAddedHandler -= UpdateTempSensor;
+        _liveUpdaterService.DoorOpenedHandler -= DoorOpened;
+        _liveUpdaterService.DoorClosedHandler -= DoorClosed;
 
         _cancellationTokenSource.Cancel();
         await _liveUpdaterService.DisposeAsync();
     }
 
-    private void UpdateTempSensor(LiveTemperatureData data)
+    private async void UpdateTempSensor(LiveTemperatureData data)
     {
-        _logger.LogInformation(data.SensorId.ToString());
         var sensor = _deviceRepository.DashboardView!.TemperatureSensors.Find(_ => _.Id == data.SensorId);
         if (sensor is null)
         {
             return;
         }
+
         sensor.Current!.Temperature = data.Temperature;
         sensor.Current.Humidity = data.Humidity;
 
         sensor.TodayTemperature = new MinMaxAverage(data.MinTemp, data.MaxTemp, data.AvgTemp);
         sensor.TodayHumidity = new MinMaxAverage(data.MinHumidity, data.MaxHumidity, data.AvgHumidity);
+
+        sensor.PastState = await _deviceRepository.GetAggregatedStatsAsync(sensor.GraphView, sensor.Id, _cancellationTokenSource.Token);
 
         StateHasChanged();
     }
@@ -80,5 +86,34 @@ public partial class Home : IAsyncDisposable
         sensor.ClosedAt = data.HappenedAt;
 
         StateHasChanged();
+    }
+
+    private async Task OnFilterChangedAsync(TemperatureAndHumiditySensorView? sensor)
+    {
+        if (sensor is null)
+        {
+            return;
+        }
+
+        sensor.PastState = await _deviceRepository.GetAggregatedStatsAsync(
+            sensor.GraphView,
+            sensor.Id,
+            _cancellationTokenSource.Token);
+    }
+
+    private string GetXAxisDataSource(TemperatureAndHumiditySensorView? sensor)
+    {
+        if (sensor is null)
+        {
+            return "Hours";
+        }
+
+        return sensor.GraphView switch
+        {
+            Filter.Last24Hours => "Hours",
+            Filter.PrevWeek => "DateTime",
+            Filter.PrevMonth => "DateTime",
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 }

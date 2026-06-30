@@ -14,14 +14,14 @@ namespace Internal.Generated.WolverineHandlers
     public sealed class GET_devices_temperature_sensors : Wolverine.Http.HttpHandler
     {
         private readonly Wolverine.Http.WolverineHttpOptions _wolverineHttpOptions;
-        private readonly Wolverine.Runtime.IWolverineRuntime _wolverineRuntime;
         private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
+        private readonly Wolverine.Runtime.IWolverineRuntime _wolverineRuntime;
 
-        public GET_devices_temperature_sensors(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Runtime.IWolverineRuntime wolverineRuntime, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory) : base(wolverineHttpOptions)
+        public GET_devices_temperature_sensors(Wolverine.Http.WolverineHttpOptions wolverineHttpOptions, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Wolverine.Runtime.IWolverineRuntime wolverineRuntime) : base(wolverineHttpOptions)
         {
             _wolverineHttpOptions = wolverineHttpOptions;
-            _wolverineRuntime = wolverineRuntime;
             _outboxedSessionFactory = outboxedSessionFactory;
+            _wolverineRuntime = wolverineRuntime;
         }
 
 
@@ -31,6 +31,7 @@ namespace Internal.Generated.WolverineHandlers
             var messageContext = new Wolverine.Runtime.MessageContext(_wolverineRuntime);
             // Building the Marten session
             await using var documentSession = _outboxedSessionFactory.OpenSession(messageContext);
+            System.Diagnostics.Activity.Current?.SetTag("handler.type", "Home.Automation.Api.Features.Device.LoadDevicesEndpoint");
             
             // The actual HTTP request handler execution
             var temperatureAndHumiditySensorResponseList_response = await Home.Automation.Api.Features.Device.LoadDevicesEndpoint.Get(((Marten.IQuerySession)documentSession), httpContext.RequestAborted).ConfigureAwait(false);

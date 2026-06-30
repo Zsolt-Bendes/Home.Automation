@@ -9,13 +9,13 @@ namespace Internal.Generated.WolverineHandlers
     [global::System.CodeDom.Compiler.GeneratedCode("JasperFx", "1.0.0")]
     public sealed class UpdateGarageDoorStatusHandler1539354163 : Wolverine.Runtime.Handlers.MessageHandler
     {
-        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly System.TimeProvider _timeProvider;
+        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
 
-        public UpdateGarageDoorStatusHandler1539354163(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, System.TimeProvider timeProvider)
+        public UpdateGarageDoorStatusHandler1539354163(System.TimeProvider timeProvider, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory)
         {
-            _outboxedSessionFactory = outboxedSessionFactory;
             _timeProvider = timeProvider;
+            _outboxedSessionFactory = outboxedSessionFactory;
         }
 
 
@@ -28,6 +28,7 @@ namespace Internal.Generated.WolverineHandlers
             var updateGarageDoorStatus = (Home.Automation.Api.Features.Device.UpdateGarageDoorStatus)context.Envelope.Message;
 
             System.Diagnostics.Activity.Current?.SetTag("message.handler", "Home.Automation.Api.Features.Device.UpdateDoorStatusHandler");
+            System.Diagnostics.Activity.Current?.SetTag("handler.type", "Home.Automation.Api.Features.Device.UpdateDoorStatusHandler");
             
             // The actual message execution
             await Home.Automation.Api.Features.Device.UpdateDoorStatusHandler.Handle(updateGarageDoorStatus, context, documentSession, _timeProvider, cancellation).ConfigureAwait(false);

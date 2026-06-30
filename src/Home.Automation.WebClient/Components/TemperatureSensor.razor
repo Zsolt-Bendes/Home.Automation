@@ -1,117 +1,172 @@
 ﻿@using Home.Automation.WebClient.Services
-<div class="border-1 m-3 bg-gray rounded border-gray-500 bg-gray-700 outline-offset-2 text-gray-200">
 
-	<div class="flex mb-1 flex-col items-center">
-		<span class="text-base">@SensorView.Name</span>
-		<span class="text-sm">Current</span>
-	</div>
+<BbCard class="w-fit">
+    <BbCardHeader>
+        <BbCardTitle>@SensorView.Name</BbCardTitle>
+        @*  <BbCardDescription>TODO: add ping date</BbCardDescription> *@
+    </BbCardHeader>
 
-	<div class="flex justify-center px-2 gap-2">
-		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
-			<span class="text-sm">Temperature</span>
-			@if (SensorView.Current is null)
-			{
-				<span class="text-2xl font-bold">N/A</span>
-			}
-			else
-			{
-				<span class="text-2xl font-bold">@SensorView.Current.Temperature&deg;C</span>
-			}
-			
-		</div>
-		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
-			<span class="text-sm">Humidity</span>
-			@if (SensorView.Current is null)
-			{
-				<span class="text-2xl font-bold">N/A</span>
-			}
-			else
-			{
-				<span class="text-2xl font-bold">@SensorView.Current.Humidity%</span>
-			}
-			
-		</div>
+    <BbCardContent class="p-2 w-fit">
+        <BbCard class="">
+            <BbCardHeader>
+                <BbCardTitle>Humidity statistics</BbCardTitle>
+            </BbCardHeader>
+            <div class="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-2">
 
-	</div>
+                <BbCard>
+                    <BbCardContent>
+                        <div class="flex SensorViews-center justify-between">
+                            <p class="text-sm font-medium text-muted-foreground">Current humidity</p>
+                        </div>
+                        <div class="mt-2">
+                            @if (SensorView.Current is null)
+                            {
+                                <h2 class="text-2xl font-bold">N/A</h2>
+                            }
+                            else
+                            {
+                                <h2 class="text-2xl font-bold">@SensorView.Current.Humidity%</h2>
+                            }
+                        </div>
+                    </BbCardContent>
+                </BbCard>
 
-	<div class="flex justify-center mt-2">
-		<span class="text-base">Daily statistics</span>
-	</div>
+                <BbCard>
+                    <BbCardContent>
+                        <div class="flex SensorViews-center justify-between">
+                            <p class="text-sm font-medium text-muted-foreground">Avarage humidity</p>
+                        </div>
+                        <div class="mt-2">
+                            @if (SensorView.Current is null)
+                            {
+                                <h2 class="text-2xl font-bold">N/A</h2>
+                            }
+                            else
+                            {
+                                <h2 class="text-2xl font-bold">@SensorView.TodayHumidity.Average.ToString("0.##")%</h2>
+                            }
+                        </div>
+                    </BbCardContent>
+                </BbCard>
 
-	<div class="flex flex-col justify-center items-center bg-black rounded p-2 m-2">
-		<span class="text-sm">Average humidity today</span>
-		@if (SensorView.Current is null)
-		{
-			<span class="text-2xl font-bold">N/A</span>
-		}
-		else
-		{
-			<span class="text-2xl font-bold">@SensorView.TodayHumidity.Average.ToString("0.##")%</span>
-		}
-	</div>
+                <BbCard>
+                    <BbCardContent>
+                        <div class="flex SensorViews-center justify-between">
+                            <p class="text-sm font-medium text-muted-foreground">Minimum humidity</p>
+                        </div>
+                        <div class="mt-2">
+                            @if (SensorView.Current is null)
+                            {
+                                <h2 class="text-2xl font-bold">N/A</h2>
+                            }
+                            else
+                            {
+                                <h2 class="text-2xl font-bold">@SensorView.TodayHumidity.Min%</h2>
+                            }
+                        </div>
+                    </BbCardContent>
+                </BbCard>
 
-	<div class="flex justify-center px-2 gap-2 mb-2">
-		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
-			<span class="text-sm">Min Humidity</span>
-			@if (SensorView.Current is null)
-			{
-				<span class="text-2xl font-bold">N/A</span>
-			}
-			else
-			{
-				<span class="text-2xl font-bold">@SensorView.TodayHumidity.Min%</span>
-			}
-		</div>
-		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
-			<span class="text-sm">Max Humidity</span>
-			@if (SensorView.Current is null)
-			{
-				<span class="text-2xl font-bold">N/A</span>
-			}
-			else
-			{
-				<span class="text-2xl font-bold">@SensorView.TodayHumidity.Max%</span>
-			}
-		</div>
-	</div>
+                <BbCard>
+                    <BbCardContent>
+                        <div class="flex SensorViews-center justify-between">
+                            <p class="text-sm font-medium text-muted-foreground">Maximum humidity</p>
+                        </div>
+                        <div class="mt-2">
+                            @if (SensorView.Current is null)
+                            {
+                                <h2 class="text-2xl font-bold">N/A</h2>
+                            }
+                            else
+                            {
+                                <h2 class="text-2xl font-bold">@SensorView.TodayHumidity.Max%</h2>
+                            }
+                        </div>
+                    </BbCardContent>
+                </BbCard>
+            </div>
+        </BbCard>
 
-	<div class="flex flex-col justify-center items-center bg-black rounded p-2 m-2">
-		<span class="text-sm">Average temperature today</span>
-		@if (SensorView.Current is null)
-		{
-			<span class="text-2xl font-bold">N/A</span>
-		}
-		else
-		{
-			<span class="text-2xl font-bold">@SensorView.TodayTemperature.Average.ToString("0.##")&deg;C</span>
-		}
-	</div>
+        <BbCard class="mt-2">
+            <BbCardHeader>
+                <BbCardTitle>Temperature statistics</BbCardTitle>
+            </BbCardHeader>
+            <div class="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-2">
+                <BbCard>
+                    <BbCardContent>
+                        <div class="flex SensorViews-center justify-between">
+                            <p class="text-sm font-medium text-muted-foreground">Current temperature</p>
+                        </div>
+                        <div class="mt-2">
+                            @if (SensorView.Current is null)
+                            {
+                                <h2 class="text-2xl font-bold">N/A</h2>
+                            }
+                            else
+                            {
+                                <h2 class="text-2xl font-bold">@SensorView.Current.Temperature&deg;C</h2>
+                            }
+                        </div>
+                    </BbCardContent>
+                </BbCard>
 
-	<div class="flex justify-center px-2 gap-2 mb-2">
-		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
-			<span class="text-sm">Min temperature</span>
-			@if (SensorView.Current is null)
-			{
-				<span class="text-2xl font-bold">N/A</span>
-			}
-			else
-			{
-				<span class="text-2xl font-bold">@SensorView.TodayTemperature.Min&deg;C</span>
-			}
-		</div>
-		<div class="flex flex-col justify-center items-center bg-black rounded p-2 w-1/2">
-			<span class="text-sm text-nowrap">Max temperature</span>
-			@if (SensorView.Current is null)
-			{
-				<span class="text-2xl font-bold">N/A</span>
-			}
-			else
-			{
-				<span class="text-2xl font-bold">@SensorView.TodayTemperature.Max&deg;C</span>
-			}
-		</div>
-	</div>
-</div>
+                <BbCard>
+                    <BbCardContent>
+                        <div class="flex SensorViews-center justify-between">
+                            <p class="text-sm font-medium text-muted-foreground">Average temperature</p>
+                        </div>
+                        <div class="mt-2">
+                            @if (SensorView.Current is null)
+                            {
+                                <h2 class="text-2xl font-bold">N/A</h2>
+                            }
+                            else
+                            {
+                                <h2 class="text-2xl font-bold">@SensorView.TodayTemperature.Average.ToString("0.##")&deg;C</h2>
+                            }
+                        </div>
+                    </BbCardContent>
+                </BbCard>
+
+                <BbCard>
+                    <BbCardContent>
+                        <div class="flex SensorViews-center justify-between">
+                            <p class="text-sm font-medium text-muted-foreground">Minimum temperature</p>
+                        </div>
+                        <div class="mt-2">
+                            @if (SensorView.Current is null)
+                            {
+                                <h2 class="text-2xl font-bold">N/A</h2>
+                            }
+                            else
+                            {
+                                <h2 class="text-2xl font-bold">@SensorView.TodayTemperature.Min&deg;C</h2>
+                            }
+                        </div>
+                    </BbCardContent>
+                </BbCard>
+
+                <BbCard>
+                    <BbCardContent>
+                        <div class="flex SensorViews-center justify-between">
+                            <p class="text-sm font-medium text-muted-foreground">Maximum temperature</p>
+                        </div>
+                        <div class="mt-2">
+                            @if (SensorView.Current is null)
+                            {
+                                <h2 class="text-2xl font-bold">N/A</h2>
+                            }
+                            else
+                            {
+                                <h2 class="text-2xl font-bold">@SensorView.TodayTemperature.Max%</h2>
+                            }
+                        </div>
+                    </BbCardContent>
+                </BbCard>
+            </div>
+        </BbCard>
+    </BbCardContent>
+</BbCard>
 
 @code {
 	[Parameter, EditorRequired]

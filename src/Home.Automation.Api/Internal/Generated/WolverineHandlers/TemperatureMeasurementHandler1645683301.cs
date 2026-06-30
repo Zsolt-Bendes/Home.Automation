@@ -11,17 +11,17 @@ namespace Internal.Generated.WolverineHandlers
     [global::System.CodeDom.Compiler.GeneratedCode("JasperFx", "1.0.0")]
     public sealed class TemperatureMeasurementHandler1645683301 : Wolverine.Runtime.Handlers.MessageHandler
     {
-        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
         private readonly Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> _hubContextOfLiveUpdater;
-        private readonly System.TimeProvider _timeProvider;
         private readonly Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Features.Device.TemperatureMeasurement> _loggerForMessage;
+        private readonly System.TimeProvider _timeProvider;
+        private readonly Wolverine.Marten.Publishing.OutboxedSessionFactory _outboxedSessionFactory;
 
-        public TemperatureMeasurementHandler1645683301(Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory, Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> hubContextOfLiveUpdater, System.TimeProvider timeProvider, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Features.Device.TemperatureMeasurement> loggerForMessage)
+        public TemperatureMeasurementHandler1645683301(Microsoft.AspNetCore.SignalR.IHubContext<Home.Automation.Api.Services.LiveUpdater> hubContextOfLiveUpdater, Microsoft.Extensions.Logging.ILogger<Home.Automation.Api.Features.Device.TemperatureMeasurement> loggerForMessage, System.TimeProvider timeProvider, Wolverine.Marten.Publishing.OutboxedSessionFactory outboxedSessionFactory)
         {
-            _outboxedSessionFactory = outboxedSessionFactory;
             _hubContextOfLiveUpdater = hubContextOfLiveUpdater;
-            _timeProvider = timeProvider;
             _loggerForMessage = loggerForMessage;
+            _timeProvider = timeProvider;
+            _outboxedSessionFactory = outboxedSessionFactory;
         }
 
 
@@ -34,6 +34,7 @@ namespace Internal.Generated.WolverineHandlers
             var temperatureMeasurement = (Home.Automation.Api.Features.Device.TemperatureMeasurement)context.Envelope.Message;
 
             System.Diagnostics.Activity.Current?.SetTag("message.handler", "Home.Automation.Api.Features.Device.TemperatureMeasurementHandler");
+            System.Diagnostics.Activity.Current?.SetTag("handler.type", "Home.Automation.Api.Features.Device.TemperatureMeasurementHandler");
             var batchedQuery = documentSession.CreateBatchQuery();
 
             var stream_sensor_BatchItem = batchedQuery.Events.FetchForWriting<Home.Automation.Api.Domain.TempAndHumiditySensors.TemperatureAndHumiditySensor>(((Home.Automation.Api.Features.Device.TemperatureMeasurement)context.Envelope.Message).SensorId);
@@ -42,6 +43,9 @@ namespace Internal.Generated.WolverineHandlers
 
             // Loading Marten aggregate as part of the aggregate handler workflow
             var stream_sensor = await stream_sensor_BatchItem.ConfigureAwait(false);
+
+            System.Diagnostics.Activity.Current?.SetTag("wolverine.stream.id", ((Home.Automation.Api.Features.Device.TemperatureMeasurement)context.Envelope.Message).SensorId.ToString());
+            System.Diagnostics.Activity.Current?.SetTag("wolverine.stream.type", "Home.Automation.Api.Domain.TempAndHumiditySensors.TemperatureAndHumiditySensor");
             var result_of_Assert2 = Wolverine.Runtime.Handlers.EntityIsNotNullGuard<Home.Automation.Api.Domain.TempAndHumiditySensors.TemperatureAndHumiditySensor>.Assert(stream_sensor.Aggregate, ((Microsoft.Extensions.Logging.ILogger)_loggerForMessage), "stream_sensor.Aggregate", context.Envelope);
             // Evaluate whether or not the execution should stop based on the HandlerContinuation value
             if (result_of_Assert2 == Wolverine.HandlerContinuation.Stop) return;

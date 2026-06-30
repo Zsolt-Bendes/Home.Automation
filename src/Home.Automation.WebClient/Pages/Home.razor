@@ -1,24 +1,52 @@
 ﻿@page "/"
+@using global::Home.Automation.WebClient.Services
 
 @if (_deviceRepository.DashboardView is not null)
 {
-	if (_deviceRepository.DashboardView.TemperatureSensors.Any())
-	{
-		<div class="flex gap-2 flex-wrap">
-			@foreach (var item in _deviceRepository.DashboardView.TemperatureSensors)
-			{
-				<TemperatureSensor SensorView=@item />
-			}
-		</div>
-	}
+    if (_deviceRepository.DashboardView.TemperatureSensors.Any())
+    {
+        <div class="flex gap-2 flex-wrap">
+            @foreach (var item in _deviceRepository.DashboardView.TemperatureSensors)
+            {
+                <TemperatureSensor SensorView=@item />
 
-	if (_deviceRepository.DashboardView.DoorStatusSensors.Any())
-	{
-		<div class="flex gap-2 flex-wrap">
-			@foreach (var item in _deviceRepository.DashboardView.DoorStatusSensors)
-			{
-				<DoorSensor DoorStatus=@item />
-			}
-		</div>
-	}
+                @if (item.PastState is not null)
+                {
+                    <BbToggleGroup TValue="Filter"
+                                   @bind-Value="item.GraphView"
+                                   Type="ToggleGroupType.Single"
+                                   @bind-Value:after="@(() => OnFilterChangedAsync(item))">
+                        <BbToggleGroupItem Value="@(Filter.Last24Hours)">
+                            past 24 hours
+                        </BbToggleGroupItem>
+                        <BbToggleGroupItem Value="@(Filter.PrevWeek)">
+                            last week
+                        </BbToggleGroupItem>
+                        <BbToggleGroupItem Value="@(Filter.PrevMonth)">
+                            past month
+                        </BbToggleGroupItem>
+                    </BbToggleGroup>
+
+                    <BbLineChart Data="@item.PastState.States" Height="300px">
+                        <BbXAxis DataKey="@(GetXAxisDataSource(item))" />
+                        <BbYAxis />
+                        <BbChartTooltip />
+                        <BbChartLegend />
+                        <BbLine DataKey="TemperatureInCelsius" Name="Temp" Color="red" />
+                        <BbLine DataKey="Humidity" Name="Humidity" Color="blue" />
+                    </BbLineChart>
+                }
+            }
+        </div>
+    }
+
+    if (_deviceRepository.DashboardView.DoorStatusSensors.Any())
+    {
+        <div class="flex gap-2 flex-wrap">
+            @foreach (var item in _deviceRepository.DashboardView.DoorStatusSensors)
+            {
+                <DoorSensor DoorStatus=@item />
+            }
+        </div>
+    }
 }

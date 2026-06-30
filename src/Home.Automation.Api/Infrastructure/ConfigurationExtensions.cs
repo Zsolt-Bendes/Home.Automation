@@ -4,6 +4,7 @@ using Home.Automation.Api.Services.Email;
 using Home.Automation.Api.Services.Email.Client;
 using JasperFx.Events.Daemon;
 using Marten;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Text;
 using Wolverine.Http;
@@ -24,7 +25,7 @@ public static class ConfigurationExtensions
 
     private static IServiceCollection AddMarten(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("postgres");
+        var connectionString = configuration.GetConnectionString("HomeAutomationDb");
         if (string.IsNullOrEmpty(connectionString))
         {
             throw new PostgresConnectionStringInsNullOrEmptyException();
@@ -48,18 +49,38 @@ public static class ConfigurationExtensions
     {
         services.Configure<EmailSettings>(configuration.GetSection("MailSettings"));
 
-        services.AddHttpClient<IEmailHttpClient, EmailHttpClient>(config =>
+        //services.AddHttpClient<IEmailHttpClient, EmailHttpClient>(config =>
+        //{
+        //var url = configuration.GetValue<string>("MailSettings:ApiUrl");
+        //var key = configuration.GetValue<string>("MailSettings:ApiKey");
+
+        //ArgumentException.ThrowIfNullOrEmpty(url);
+        //ArgumentException.ThrowIfNullOrEmpty(key);
+
+        //var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"api:{key}"));
+
+        //config.BaseAddress = new Uri(url);
+        //config.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+        //});
+
+        services.AddSingleton<IEmailHttpClient>(sp =>
         {
+            var factory = sp.GetRequiredService<IHttpClientFactory>();
+            var emailSettings = sp.GetRequiredService<IOptions<EmailSettings>>();
+            var logger = sp.GetRequiredService<ILogger<EmailHttpClient>>();
+
+            var client = factory.CreateClient("Email");
+
             var url = configuration.GetValue<string>("MailSettings:ApiUrl");
             var key = configuration.GetValue<string>("MailSettings:ApiKey");
 
-            ArgumentException.ThrowIfNullOrEmpty(url);
-            ArgumentException.ThrowIfNullOrEmpty(key);
-
             var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"api:{key}"));
 
-            config.BaseAddress = new Uri(url);
-            config.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+            client.BaseAddress = new Uri(url);
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Basic", credentials);
+
+            return new EmailHttpClient(client, emailSettings, logger);
         });
 
         services.AddTransient<IEmailService, EmailService>();
